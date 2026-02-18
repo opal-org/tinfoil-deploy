@@ -1,33 +1,23 @@
-# Tinfoil Function Configuration
-# This file will be auto-populated when you deploy via the Tinfoil dashboard.
-# You can also edit it manually - see docs at https://docs.tinfoil.sh/functions/config
-#
-# After creating this repo from the template:
-# 1. Go to https://dash.tinfoil.sh and create a new function
-# 2. Provide this repository URL and your container details
-# 3. This file will be automatically updated with your deployment settings
-#
-# For updates: edit this file, commit, and push a new tag (e.g., v2)
-
 shim-version: v0.3.18@sha256:7d9f98be78c91ede89f43c948a12d084fae34312effe9395ca7ed572991cb561
 cvm-version: 0.6.7
 cpus: 2
 memory: 8192
 
-# Container configuration
-# Note: image must include SHA256 hash (e.g., image:tag@sha256:abc123...)
 containers:
   - name: "app"
-    image: "your-image:tag@sha256:..."
+    image: "ghcr.io/opal-org/tinfoil-smoke-function:tinfoil-smoke-v0.1.0-local@sha256:45197ead36ea486528967aa06d91c38ade4d863fa98438d1ad414de72926f47f"
     env:
-      - LOG_LEVEL: "info"
+      - TINFOIL_BASE_URL: "https://inference.tinfoil.sh/v1"
+      - TINFOIL_LLM_MODEL: "gpt-oss-120b"
+      - TINFOIL_EMBED_MODEL: "nomic-embed-text"
     secrets:
-      - API_KEY
-    command: ["--port", "8000"]
+      - TINFOIL_API_KEY
 
-# Shim configuration (adjust upstream-port and paths to match your container)
 shim:
   listen-port: 443
-  upstream-port: 8000
+  upstream-port: 8080
   paths:
-    - /health
+    - /healthz
+    - /ingest
+    - /query
+    - /smoke
