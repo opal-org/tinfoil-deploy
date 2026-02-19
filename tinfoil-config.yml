@@ -5,11 +5,14 @@ memory: 8192
 
 containers:
   - name: "app"
-    image: "ghcr.io/opal-org/tinfoil-smoke-function:tinfoil-smoke-v0.1.0-local@sha256:45197ead36ea486528967aa06d91c38ade4d863fa98438d1ad414de72926f47f"
+    image: "ghcr.io/opal-org/tinfoil-smoke-function:tinfoil-smoke-v0.2.0-local@sha256:9374afca039dcaf5bd7c8d1b9042611ba15de6b9ee30ee4965438ae52fa5db90"
     env:
       - TINFOIL_BASE_URL: "https://inference.tinfoil.sh/v1"
+      - TINFOIL_INFERENCE_ENCLAVE: "inference.tinfoil.sh"
+      - TINFOIL_INFERENCE_REPO: "tinfoilsh/confidential-model-router"
       - TINFOIL_LLM_MODEL: "gpt-oss-120b"
       - TINFOIL_EMBED_MODEL: "nomic-embed-text"
+      - TINFOIL_SMOKE_BUILD_MARKER: "sdk-attested-model-calls-20260219-r1"
     secrets:
       - TINFOIL_API_KEY
 
