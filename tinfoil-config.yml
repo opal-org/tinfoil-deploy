@@ -7,8 +7,8 @@ containers:
   - name: "app"
     image: "ghcr.io/opal-org/tinfoil-smoke-function:tinfoil-smoke-v0.2.1-local@sha256:664854bbf9af16087bd67f014de2a37877a8d0b519f0409566e8f00b6c4c636d"
     env:
-      - TINFOIL_BASE_URL: "https://inference.tinfoil.sh/v1"
-      - TINFOIL_INFERENCE_ENCLAVE: "inference.tinfoil.sh"
+      - TINFOIL_BASE_URL: "https://router.inf5.tinfoil.sh/v1"
+      - TINFOIL_INFERENCE_ENCLAVE: "router.inf5.tinfoil.sh"
       - TINFOIL_INFERENCE_REPO: "tinfoilsh/confidential-model-router"
       - TINFOIL_LLM_MODEL: "gpt-oss-120b"
       - TINFOIL_EMBED_MODEL: "nomic-embed-text"
@@ -24,3 +24,14 @@ shim:
     - /ingest
     - /query
     - /smoke
+
+network:
+  whitelist:
+    - https://router.inf5.tinfoil.sh
+    - https://router.inf5.tinfoil.sh/.well-known/tinfoil-attestation
+    - https://router.inf5.tinfoil.sh/v1
+    - https://router.inf5.tinfoil.sh/v1/chat/completions
+    - https://router.inf5.tinfoil.sh/v1/embeddings
+    - https://api-github-proxy.tinfoil.sh
+    - https://github-proxy.tinfoil.sh
+    - https://tuf-repo-cdn.sigstore.dev
