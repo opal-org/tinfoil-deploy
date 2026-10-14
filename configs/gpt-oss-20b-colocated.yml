@@ -1,0 +1,81 @@
+{
+  "cvm-version": "0.14.13",
+  "cpus": 4,
+  "memory": 65536,
+  "gpus": 1,
+  "networks": {
+    "nvidia": {
+      "egress": "allowlist",
+      "allow": [
+        "edge.urm.nvidia.com",
+        "openaipublic.blob.core.windows.net"
+      ]
+    }
+  },
+  "models": [
+    {
+      "name": "gpt-oss-20b",
+      "repo": "openai/gpt-oss-20b@6cee5e81ee83917806bbde320786a8fb61efebee",
+      "mpk": "fa8945a2fd0ffe7ddfd31b5da869e2c7c045c971e0230e2fd500fc125315f0bf_41301471232_8b6516c9-adf7-5235-a86a-f135dba359c1"
+    }
+  ],
+  "containers": [
+    {
+      "name": "gpt-oss-20b",
+      "image": "vllm/vllm-openai:v0.17.0-cu130@sha256:de06f6d78a2ce86856094a643d6c914d8bd7109f73c2e30f38097197b2f2bba1",
+      "runtime": "nvidia",
+      "gpus": "all",
+      "networks": [
+        "nvidia"
+      ],
+      "restart": "always",
+      "command": [
+        "--model",
+        "/tinfoil/mpk/mpk-fa8945a2fd0ffe7ddfd31b5da869e2c7c045c971e0230e2fd500fc125315f0bf",
+        "--served-model-name",
+        "gpt-oss-20b",
+        "--enable-auto-tool-choice",
+        "--tool-call-parser",
+        "openai",
+        "--gpu-memory-utilization",
+        "0.95",
+        "--port",
+        "8001"
+      ],
+      "tmpfs": {
+        "/tmp": "size=512m,mode=1777,exec",
+        "/root": "size=2g,mode=0700,exec"
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-sf",
+          "http://localhost:8001/health"
+        ],
+        "interval": "30s",
+        "timeout": "5s",
+        "start_period": "30m"
+      },
+      "ipc": "private",
+      "shm_size": "2g",
+      "env": [
+        {
+          "LD_LIBRARY_PATH": "/usr/local/nvidia/lib64:/usr/local/nvidia/lib:/usr/lib/x86_64-linux-gnu"
+        }
+      ]
+    }
+  ],
+  "shim": {
+    "upstream-port": 8001,
+    "authenticated": true,
+    "authenticated-endpoints": [
+      "/v1/chat/completions"
+    ],
+    "paths": [
+      "/v1/chat/completions",
+      "/v1/models",
+      "/health"
+    ]
+  }
+}
