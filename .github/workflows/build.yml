@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+      - '!v2026.10.14-*'
 
 jobs:
   release:
