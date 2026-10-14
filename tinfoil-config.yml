@@ -1,35 +1,23 @@
-cvm-version: 0.7.1
-cpus: 4
-memory: 4096
-
-containers:
-  - name: "app"
-    image: "ghcr.io/opal-org/tinfoil-smoke-function:tinfoil-smoke-v0.2.3@sha256:d66157ceae9666d00d5aca292915620563d0bfd7e126224cfb51c988078489e9"
-    env:
-      - TINFOIL_BASE_URL: "https://router.inf5.tinfoil.sh/v1"
-      - TINFOIL_INFERENCE_ENCLAVE: "router.inf5.tinfoil.sh"
-      - TINFOIL_INFERENCE_REPO: "tinfoilsh/confidential-model-router"
-      - TINFOIL_LLM_MODEL: "gpt-oss-120b"
-      - TINFOIL_EMBED_MODEL: "nomic-embed-text"
-      - TINFOIL_SMOKE_BUILD_MARKER: "sdk-attested-model-calls-20260303-r1"
-    secrets:
-      - TINFOIL_API_KEY
-
-shim:
-  upstream-port: 8080
-  paths:
-    - /healthz
-    - /ingest
-    - /query
-    - /smoke
-
-network:
-  whitelist:
-    - https://router.inf5.tinfoil.sh
-    - https://router.inf5.tinfoil.sh/.well-known/tinfoil-attestation
-    - https://router.inf5.tinfoil.sh/v1
-    - https://router.inf5.tinfoil.sh/v1/chat/completions
-    - https://router.inf5.tinfoil.sh/v1/embeddings
-    - https://api-github-proxy.tinfoil.sh
-    - https://github-proxy.tinfoil.sh
-    - https://tuf-repo-cdn.sigstore.dev
+{
+  "cvm-version": "0.14.13",
+  "cpus": 4,
+  "memory": 8192,
+  "containers": [
+    {
+      "name": "placement",
+      "image": "ghcr.io/tinfoilsh/tinfoil-containers-hello-world@sha256:c943b1cab16409e2e686ad71deab30364c27421852cdd6b3080df1c7a38331ed",
+      "env": [
+        {
+          "MESSAGE": "Opal CPU placement check"
+        }
+      ]
+    }
+  ],
+  "shim": {
+    "upstream-port": 8080,
+    "upstream-container": "placement",
+    "paths": [
+      "/*"
+    ]
+  }
+}
