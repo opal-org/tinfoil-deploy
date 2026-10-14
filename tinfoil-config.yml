@@ -1,35 +1,70 @@
-cvm-version: 0.7.1
-cpus: 4
-memory: 4096
-
-containers:
-  - name: "app"
-    image: "ghcr.io/opal-org/tinfoil-smoke-function:tinfoil-smoke-v0.2.3@sha256:d66157ceae9666d00d5aca292915620563d0bfd7e126224cfb51c988078489e9"
-    env:
-      - TINFOIL_BASE_URL: "https://router.inf5.tinfoil.sh/v1"
-      - TINFOIL_INFERENCE_ENCLAVE: "router.inf5.tinfoil.sh"
-      - TINFOIL_INFERENCE_REPO: "tinfoilsh/confidential-model-router"
-      - TINFOIL_LLM_MODEL: "gpt-oss-120b"
-      - TINFOIL_EMBED_MODEL: "nomic-embed-text"
-      - TINFOIL_SMOKE_BUILD_MARKER: "sdk-attested-model-calls-20260303-r1"
-    secrets:
-      - TINFOIL_API_KEY
-
-shim:
-  upstream-port: 8080
-  paths:
-    - /healthz
-    - /ingest
-    - /query
-    - /smoke
-
-network:
-  whitelist:
-    - https://router.inf5.tinfoil.sh
-    - https://router.inf5.tinfoil.sh/.well-known/tinfoil-attestation
-    - https://router.inf5.tinfoil.sh/v1
-    - https://router.inf5.tinfoil.sh/v1/chat/completions
-    - https://router.inf5.tinfoil.sh/v1/embeddings
-    - https://api-github-proxy.tinfoil.sh
-    - https://github-proxy.tinfoil.sh
-    - https://tuf-repo-cdn.sigstore.dev
+{
+  "cvm-version": "0.14.13",
+  "cpus": 4,
+  "memory": 65536,
+  "gpus": 1,
+  "models": [
+    {
+      "name": "nomic-embed-text-v1.5",
+      "repo": "nomic-ai/nomic-embed-text-v1.5@e5cf08aadaa33385f5990def41f7a23405aec398",
+      "mpk": "868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935_2215256064_328142c7-83ed-5f89-a463-0a11367cf58f"
+    }
+  ],
+  "containers": [
+    {
+      "name": "nomic-embed-text-v1.5",
+      "image": "ghcr.io/huggingface/text-embeddings-inference:100-1.9@sha256:16be3893ada5d7decaa60bb08b5cd021504b783bfd87ab1473ebacae7026add3",
+      "runtime": "nvidia",
+      "gpus": "all",
+      "restart": "always",
+      "command": [
+        "--model-id",
+        "/tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935",
+        "--served-model-name",
+        "nomic-embed-text",
+        "--port",
+        "8001"
+      ],
+      "tmpfs": {
+        "/tmp": "size=512m,mode=1777,exec",
+        "/root": "size=2g,mode=0700,exec"
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-sf",
+          "http://localhost:8001/health"
+        ],
+        "interval": "30s",
+        "timeout": "5s",
+        "start_period": "60m"
+      },
+      "networks": [
+        "nvidia"
+      ]
+    }
+  ],
+  "shim": {
+    "upstream-port": 8001,
+    "authenticated": true,
+    "authenticated-endpoints": [
+      "/v1/embeddings",
+      "/metrics"
+    ],
+    "paths": [
+      "/v1/embeddings",
+      "/metrics",
+      "/health"
+    ]
+  },
+  "networks": {
+    "nvidia": {
+      "egress": "allowlist",
+      "allow": [
+        "edge.urm.nvidia.com",
+        "openaipublic.blob.core.windows.net"
+      ]
+    }
+  }
+}
