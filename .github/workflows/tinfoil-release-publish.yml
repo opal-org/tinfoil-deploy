@@ -7,6 +7,9 @@ run-name: Publish release ${{ github.ref_name }}
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - 'v2026.10.14-*'
 
 concurrency:
   group: tinfoil-container-release-${{ github.ref_name }}
