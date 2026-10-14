@@ -1,14 +1,14 @@
 {
   "base_image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:c2205279dac0f60e47579c006f3b3d7ca8cef522835c420f83024b2b1be069d7",
   "runtime_original_sha256": "ac5bf672b11bfc658ed69f3da75d9e7d2c7edd2694c05f0b3bdf22312e9d8c37",
-  "runtime_fixed_sha256": "a9d394993f3b303a2ea94a6ad7c8b214f2e0f6e141295b4ce4380ec6cd8d5f55",
-  "change": "Load or bootstrap the signed rollback record immediately after authenticated runtime-state hydration during full initialization.",
+  "runtime_fixed_sha256": "8e536e3e1786f64bb5736f1e92c7a9da98e0cc157edbd97344ea3a5c10382f58",
+  "change": "Load or bootstrap the signed rollback record after state hydration; report unavailable native data-store memory measurements as null with an explicit lower-bound label.",
   "files": {
     "Dockerfile": "ca82889bf7e14cd8dbff4837af9ac0bcdee3f7edd59af6a415a5e4637d5ae6be",
-    "opal_function_server.py": "a9d394993f3b303a2ea94a6ad7c8b214f2e0f6e141295b4ce4380ec6cd8d5f55",
+    "opal_function_server.py": "8e536e3e1786f64bb5736f1e92c7a9da98e0cc157edbd97344ea3a5c10382f58",
     "start_opal.py": "1ae4fde40c167b571353d90244e6122100747cdc6713b2ffa3df19c5e7e94d06",
     "v2_model_proxy.py": "e5307627682fd05428c91873a3207dfe6cf0d4e6e580a309c721a2bb0c72585c",
     "volume_unlock.py": "f36b7b639f05929f8435479a1e9a73d3a896bfacef9f11e7706ecae8e8436e71"
   },
-  "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:32934c6a8b5e1506dc8b3c77f842d84987a324ec46480c41c07897d5377090a4"
+  "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:c7fdef4d9c9a7ad10264b0cc9d027347c7d9f05d46425e8ca332a9f8b613f82a"
 }
