@@ -96,13 +96,13 @@
           "TINFOIL_INFERENCE_ENCLAVE": "nomic-embed-text.sky-computing-lab.containers.tinfoil.dev"
         },
         {
-          "TINFOIL_INFERENCE_REPO": "opal-org/tinfoil-deploy@v2026.10.14-nomic-embed-text-small-1"
+          "TINFOIL_INFERENCE_REPO": "opal-org/tinfoil-deploy@v2026.10.14-nomic-embed-text-small-2"
         },
         {
           "TINFOIL_LLM_INFERENCE_ENCLAVE": "gpt-oss-20b.sky-computing-lab.containers.tinfoil.dev"
         },
         {
-          "TINFOIL_LLM_INFERENCE_REPO": "opal-org/tinfoil-deploy@v2026.10.14-gpt-oss-20b-small-1"
+          "TINFOIL_LLM_INFERENCE_REPO": "opal-org/tinfoil-deploy@v2026.10.14-gpt-oss-20b-small-2"
         }
       ],
       "secrets": [
