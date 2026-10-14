@@ -7,7 +7,7 @@
  import json
  import os
  import subprocess
-@@ -8,7 +10,13 @@
+@@ -8,7 +10,14 @@
  
  import requests
  
@@ -16,12 +16,13 @@
 +parser = argparse.ArgumentParser()
 +parser.add_argument("--artifacts-dir", type=Path, default=data / "opal-artifacts/current")
 +parser.add_argument("--oram-tree-depth", type=int)
++parser.add_argument("--initialize-rollback-state", action="store_true")
 +args = parser.parse_args()
 +artifacts = args.artifacts_dir
  probe = data / ".opal-write-check"
  probe.write_bytes(b"ready\n")
  probe.unlink()
-@@ -21,7 +29,15 @@
+@@ -21,7 +30,15 @@
  environment.update({"OPAL_CLIENT_STATE_KEY_HEX": key,
                      "OPAL_CLIENT_KEY_BOOTSTRAP_TOKEN": payload["bootstrap_token"],
                      "OPAL_ROLLBACK_SIGNING_KEY_HEX": payload["rollback_signing_key_hex"],
@@ -38,7 +39,7 @@
  logs = data / "logs"
  logs.mkdir(exist_ok=True)
  proxies = []
-@@ -30,8 +46,10 @@
+@@ -30,8 +47,10 @@
      ("chat", environment["TINFOIL_LLM_INFERENCE_ENCLAVE"], environment["TINFOIL_LLM_INFERENCE_REPO"], 18082),
  ]:
      with (logs / (name + "-proxy.log")).open("ab") as log:
@@ -51,13 +52,15 @@
                                     env=environment, stdout=log, stderr=subprocess.STDOUT,
                                     start_new_session=True)
      proxies.append((process, port))
-@@ -48,14 +66,24 @@
+@@ -48,14 +67,26 @@
          time.sleep(2)
      else:
          raise SystemExit("Verified model proxy did not become ready")
 -artifacts = data / "opal-artifacts/current"
- if not (artifacts / "unified_v2.db").exists():
+-if not (artifacts / "unified_v2.db").exists():
 -    scaffold = "from python.trusted.tinfoil.deploy_disk_runtime import SCAFFOLD_SCRIPT\nexec(SCAFFOLD_SCRIPT)"
++new_store = not (artifacts / "unified_v2.db").exists()
++if new_store:
 +    deployment_source = Path("/app/python/trusted/tinfoil/deploy_disk_runtime.py").read_text()
 +    scaffold_assignment = next(
 +        node for node in ast.parse(deployment_source).body
@@ -72,10 +75,11 @@
             "--host", "0.0.0.0", "--port", "8080", "--storage-mode", "disk",
             "--artifacts-dir", str(artifacts), "--query-candidate-budget", "200", "--query-top-k-budget", "10"]
 -subprocess.run(command + ["--bootstrap-rollback-state"], env=environment, cwd="/app", check=True)
-+bootstrap_environment = dict(environment)
-+bootstrap_environment["OPAL_SESSION_LIFECYCLE_DEFER_HEAVY_BOOT"] = "0"
-+subprocess.run(command + ["--bootstrap-rollback-state"], env=bootstrap_environment,
-+               cwd="/app", check=True)
++if new_store or args.initialize_rollback_state:
++    bootstrap_environment = dict(environment)
++    bootstrap_environment["OPAL_SESSION_LIFECYCLE_DEFER_HEAVY_BOOT"] = "0"
++    subprocess.run(command + ["--bootstrap-rollback-state"], env=bootstrap_environment,
++                   cwd="/app", check=True)
  with (logs / "opal-runtime.log").open("ab") as log:
      process = subprocess.Popen(command, env=environment, cwd="/app", stdout=log,
                                 stderr=subprocess.STDOUT, start_new_session=True)
