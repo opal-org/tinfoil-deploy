@@ -1,20 +1,27 @@
 --- a/start_opal.py
 +++ b/start_opal.py
-@@ -1,4 +1,5 @@
+@@ -1,4 +1,6 @@
  #!/usr/bin/env python3
++import argparse
 +import ast
  import json
  import os
  import subprocess
-@@ -8,6 +9,7 @@
+@@ -8,7 +10,13 @@
  
  import requests
  
 +parser_root = Path(__file__).resolve().parent
  data = Path("/tmp/data")
++parser = argparse.ArgumentParser()
++parser.add_argument("--artifacts-dir", type=Path, default=data / "opal-artifacts/current")
++parser.add_argument("--oram-tree-depth", type=int)
++args = parser.parse_args()
++artifacts = args.artifacts_dir
  probe = data / ".opal-write-check"
  probe.write_bytes(b"ready\n")
-@@ -21,7 +23,12 @@
+ probe.unlink()
+@@ -21,7 +29,15 @@
  environment.update({"OPAL_CLIENT_STATE_KEY_HEX": key,
                      "OPAL_CLIENT_KEY_BOOTSTRAP_TOKEN": payload["bootstrap_token"],
                      "OPAL_ROLLBACK_SIGNING_KEY_HEX": payload["rollback_signing_key_hex"],
@@ -23,12 +30,15 @@
 +                    "OPAL_BOOTSTRAP_MODE": "empty",
 +                    "OPAL_ORAM_FAISS_AUTOLOAD_ARTIFACT_RESOURCES": "0",
 +                    "OPAL_ORAM_PREFIX_FAISS_BOOTSTRAP_ROWS": "64000",
-+                    "OPAL_CHECKPOINT_FILE": str(data / "opal-artifacts/current/opal_online_checkpoint.json"),
++                    "OPAL_CHECKPOINT_FILE": str(artifacts / "opal_online_checkpoint.json"),
 +                    "OPAL_MODEL_TIMING_JSONL": str(data / "logs/model_timing.jsonl")})
++environment["OPAL_ARTIFACTS_DIR"] = str(artifacts)
++if args.oram_tree_depth is not None:
++    environment["OPAL_ORAM_TREE_DEPTH"] = str(args.oram_tree_depth)
  logs = data / "logs"
  logs.mkdir(exist_ok=True)
  proxies = []
-@@ -30,8 +37,10 @@
+@@ -30,8 +46,10 @@
      ("chat", environment["TINFOIL_LLM_INFERENCE_ENCLAVE"], environment["TINFOIL_LLM_INFERENCE_REPO"], 18082),
  ]:
      with (logs / (name + "-proxy.log")).open("ab") as log:
@@ -41,9 +51,11 @@
                                     env=environment, stdout=log, stderr=subprocess.STDOUT,
                                     start_new_session=True)
      proxies.append((process, port))
-@@ -50,12 +59,22 @@
+@@ -48,14 +66,24 @@
+         time.sleep(2)
+     else:
          raise SystemExit("Verified model proxy did not become ready")
- artifacts = data / "opal-artifacts/current"
+-artifacts = data / "opal-artifacts/current"
  if not (artifacts / "unified_v2.db").exists():
 -    scaffold = "from python.trusted.tinfoil.deploy_disk_runtime import SCAFFOLD_SCRIPT\nexec(SCAFFOLD_SCRIPT)"
 +    deployment_source = Path("/app/python/trusted/tinfoil/deploy_disk_runtime.py").read_text()
@@ -54,6 +66,7 @@
 +                for target in node.targets)
 +    )
 +    scaffold = ast.literal_eval(scaffold_assignment.value)
++    scaffold = scaffold.replace("/tmp/data/opal-artifacts/current", str(artifacts))
      subprocess.run([sys.executable, "-c", scaffold], env=environment, cwd="/app", check=True)
  command = [sys.executable, "-u", "-m", "python.runtime.opal_function_server",
             "--host", "0.0.0.0", "--port", "8080", "--storage-mode", "disk",

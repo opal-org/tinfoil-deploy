@@ -39,7 +39,7 @@
   "containers": [
     {
       "name": "workspace",
-      "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:52f3835c11a9a1a7c51f044b152fba0cd083f421f77de221de238e253d5acada",
+      "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:9ee7e3ed26144ea2b74ccb56c14c4a89076736fe9aa5318c5a0880378402903a",
       "user": "0:0",
       "cvm_admin": true,
       "read_only": true,

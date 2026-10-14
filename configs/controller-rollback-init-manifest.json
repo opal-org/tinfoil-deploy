@@ -2,13 +2,13 @@
   "base_image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:c2205279dac0f60e47579c006f3b3d7ca8cef522835c420f83024b2b1be069d7",
   "runtime_original_sha256": "ac5bf672b11bfc658ed69f3da75d9e7d2c7edd2694c05f0b3bdf22312e9d8c37",
   "runtime_fixed_sha256": "3af55797ae6f23747b5cd1adb21d52df317266c2e7adf2a7d3f97289de8712c4",
-  "change": "Initialize signed rollback state, label unavailable memory metrics, and start empty on chronological exact FAISS warmup with future artifact autoload disabled.",
+  "change": "Initialize signed rollback state; report unavailable memory measurements honestly; support explicit empty-store capacity and artifact directory with chronological exact FAISS warmup.",
   "files": {
     "Dockerfile": "ca82889bf7e14cd8dbff4837af9ac0bcdee3f7edd59af6a415a5e4637d5ae6be",
     "opal_function_server.py": "3af55797ae6f23747b5cd1adb21d52df317266c2e7adf2a7d3f97289de8712c4",
-    "start_opal.py": "c439d3064061a508ee2d27b96ae5fe22def3e4f94de98aedbccc5055cec03ceb",
+    "start_opal.py": "6f845722b6bea2e5026a4e596eee6abe778e76e02093152369c95e8527acd3ad",
     "v2_model_proxy.py": "e5307627682fd05428c91873a3207dfe6cf0d4e6e580a309c721a2bb0c72585c",
     "volume_unlock.py": "f36b7b639f05929f8435479a1e9a73d3a896bfacef9f11e7706ecae8e8436e71"
   },
-  "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:52f3835c11a9a1a7c51f044b152fba0cd083f421f77de221de238e253d5acada"
+  "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:9ee7e3ed26144ea2b74ccb56c14c4a89076736fe9aa5318c5a0880378402903a"
 }
