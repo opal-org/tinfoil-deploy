@@ -13,7 +13,7 @@
   "containers": [
     {
       "name": "nomic-embed-text-v1.5",
-      "image": "ghcr.io/huggingface/text-embeddings-inference@sha256:346a39baecdd03c40e77184c66a4a9931ec2e25b8e57ff3766b79affdbd38673",
+      "image": "ghcr.io/huggingface/text-embeddings-inference@sha256:9495493e71dfa487f2cae6ffb64628a1f87a93875535bc717a88abe432b5f88c",
       "runtime": "nvidia",
       "gpus": "all",
       "restart": "always",
@@ -23,7 +23,9 @@
         "--served-model-name",
         "nomic-embed-text",
         "--port",
-        "8001"
+        "8001",
+        "--auto-truncate",
+        "false"
       ],
       "tmpfs": {
         "/tmp": "size=512m,mode=1777,exec",
