@@ -1,7 +1,7 @@
 {
   "cvm-version": "0.14.13",
   "cpus": 4,
-  "memory": 32768,
+  "memory": 65536,
   "gpus": 1,
   "networks": {
     "nvidia": {
