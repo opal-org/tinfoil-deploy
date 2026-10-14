@@ -1,14 +1,49 @@
 --- a/opal_function_server.py
 +++ b/opal_function_server.py
-@@ -3018,6 +3018,7 @@
+@@ -2965,11 +2965,11 @@
+             index_root = self.settings.artifacts_dir / "unified_v2_faiss"
+             index_file = index_root.with_suffix(".index")
+             if index_file.exists():
+-                self._load_faiss_preselection_resources()
++                self._load_faiss_preselection_resources(allow_vector_reads=False)
+                 self.faiss_resource_bytes = self._estimate_faiss_resource_bytes()
+                 _print_boot_stage_metrics("faiss_resources_loaded")
+         else:
+-            self._load_faiss_preselection_resources()
++            self._load_faiss_preselection_resources(allow_vector_reads=False)
+             self.faiss_resource_bytes = self._estimate_faiss_resource_bytes()
+             _print_boot_stage_metrics("faiss_resources_loaded")
+         self.ingest_char_cap = self._resolve_ingest_char_cap()
+@@ -3018,6 +3018,10 @@
              return
          self._materialize_opal_session_working_set_locked()
          self._hydrate_runtime_state_from_client_state(apply_live_state=True)
 +        self._load_or_bootstrap_rollback_state()
++        if not _env_flag("OPAL_ORAM_FAISS_AUTOLOAD_ARTIFACT_RESOURCES", default=True) and _opal_prefix_faiss_bootstrap_rows() > 0:
++            self._load_faiss_preselection_resources()
++            self.faiss_resource_bytes = self._estimate_faiss_resource_bytes()
          self.opal_session_working_set_materialized = True
          _print_boot_stage_metrics("runtime_ready")
          self.runtime_ready = True
-@@ -9801,24 +9802,29 @@
+@@ -7032,7 +7036,7 @@
+             for faiss_id, item_id in enumerate(self.faiss_id_map)
+         }
+ 
+-    def _load_faiss_preselection_resources(self) -> None:
++    def _load_faiss_preselection_resources(self, *, allow_vector_reads: bool = True) -> None:
+         self.faiss_preselection_enabled = False
+         self.faiss_index = None
+         self.faiss_index_metadata = {}
+@@ -7058,7 +7062,7 @@
+             self.faiss_preselection_enabled = True
+             self.faiss_index = faiss.IndexFlatIP(int(self.embedding_dim))
+             logical_count = int(len(self.oram_ann_store))
+-            if logical_count > 0:
++            if logical_count > 0 and allow_vector_reads:
+                 item_ids = [int(self.oram_ann_store.item_id_at(oram_id)) for oram_id in range(logical_count)]
+                 matrix = np.asarray(
+                     self.oram_ann_store.peek_vectors_by_oram_ids(list(range(logical_count))),
+@@ -9801,24 +9805,29 @@
                  total_bytes += int(path.stat().st_size)
          return int(total_bytes)
  
@@ -46,7 +81,7 @@
          }
  
      def state_size_metrics(self) -> Dict[str, Any]:
-@@ -9826,8 +9832,9 @@
+@@ -9826,8 +9835,9 @@
          oram_client_state_metrics = self._oram_client_state_metrics()
          kg_live_sqlite_metrics = self._kg_live_sqlite_metrics()
          dream_runtime = getattr(self, "dream_runtime", None)
@@ -57,7 +92,7 @@
          )
          oram_data_cache_payload_bytes = self._oram_data_cache_payload_bytes()
          faiss_resource_bytes = int(self.faiss_resource_bytes)
-@@ -9903,7 +9910,7 @@
+@@ -9903,7 +9913,7 @@
              int(ann_metadata_metrics["total_bytes"])
              + int(oram_client_state_metrics["total_bytes"])
              + int(kg_live_sqlite_metrics["resident_proxy_bytes"])
@@ -66,7 +101,7 @@
              + int(oram_data_cache_metadata_bytes)
              + int(faiss_resource_bytes)
              + int(secure_baseline_resident_working_set_floor_bytes)
-@@ -9915,7 +9922,8 @@
+@@ -9915,7 +9925,8 @@
              "oram_client_state_breakdown": dict(oram_client_state_metrics),
              "knowledge_graph_state_bytes": int(kg_live_sqlite_metrics["resident_proxy_bytes"]),
              "knowledge_graph_state_breakdown": dict(kg_live_sqlite_metrics),
@@ -76,7 +111,7 @@
              "faiss_resource_bytes": int(faiss_resource_bytes),
              "oram_data_cache_metadata_bytes": int(oram_data_cache_metadata_bytes),
              "oram_data_cache_payload_bytes": int(oram_data_cache_payload_bytes),
-@@ -9939,6 +9947,10 @@
+@@ -9939,6 +9950,10 @@
                  secure_baseline_resident_working_set_floor_bytes
              ),
              "live_user_state_bytes_total": int(live_user_state_bytes_total),
@@ -87,3 +122,17 @@
          }
  
      def summary_runtime_metrics(self) -> Dict[str, Any]:
+@@ -10952,11 +10967,11 @@
+             index_root = self.settings.artifacts_dir / "unified_v2_faiss"
+             index_file = index_root.with_suffix(".index")
+             if index_file.exists():
+-                self._load_faiss_preselection_resources()
++                self._load_faiss_preselection_resources(allow_vector_reads=False)
+                 self.faiss_resource_bytes = self._estimate_faiss_resource_bytes()
+                 _print_boot_stage_metrics("faiss_resources_loaded")
+         else:
+-            self._load_faiss_preselection_resources()
++            self._load_faiss_preselection_resources(allow_vector_reads=False)
+             self.faiss_resource_bytes = self._estimate_faiss_resource_bytes()
+             _print_boot_stage_metrics("faiss_resources_loaded")
+         faiss_elapsed_ms = float((time.perf_counter() - faiss_started) * 1000.0)

@@ -1,14 +1,14 @@
 {
   "base_image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:c2205279dac0f60e47579c006f3b3d7ca8cef522835c420f83024b2b1be069d7",
   "runtime_original_sha256": "ac5bf672b11bfc658ed69f3da75d9e7d2c7edd2694c05f0b3bdf22312e9d8c37",
-  "runtime_fixed_sha256": "3af55797ae6f23747b5cd1adb21d52df317266c2e7adf2a7d3f97289de8712c4",
-  "change": "Initialize signed rollback state for a fresh store; validate existing signed state on reopen; label unavailable memory metrics; support explicit artifact placement/capacity and chronological exact FAISS warmup.",
+  "runtime_fixed_sha256": "024c981af0caf3f24ab384b47aa7b416a6739551e48ebda5fbc0c15ce4cc78f6",
+  "change": "Restore ORAM client state and validate signed rollback before ANN-vector reads; initialize rollback for a fresh store; label unavailable memory metrics; use explicit capacity and chronological exact FAISS warmup.",
   "files": {
     "Dockerfile": "ca82889bf7e14cd8dbff4837af9ac0bcdee3f7edd59af6a415a5e4637d5ae6be",
-    "opal_function_server.py": "3af55797ae6f23747b5cd1adb21d52df317266c2e7adf2a7d3f97289de8712c4",
+    "opal_function_server.py": "024c981af0caf3f24ab384b47aa7b416a6739551e48ebda5fbc0c15ce4cc78f6",
     "start_opal.py": "4edcc49a31b8cbf21980f95c25a44ef9767ec76debe74fc1dae7870cc7ae6a21",
     "v2_model_proxy.py": "e5307627682fd05428c91873a3207dfe6cf0d4e6e580a309c721a2bb0c72585c",
     "volume_unlock.py": "f36b7b639f05929f8435479a1e9a73d3a896bfacef9f11e7706ecae8e8436e71"
   },
-  "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:ce614bddd86d050c9374eb76d78cdc94724d5f1b208c673cb564ad23d9e92245"
+  "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:88c8134e72f9aa15380c2afbc44be65586121e534b36994b7623eba62d351cec"
 }
