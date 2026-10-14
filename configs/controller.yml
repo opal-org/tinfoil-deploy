@@ -118,7 +118,7 @@
         "retries": 12,
         "start_period": "30s"
       },
-      "persistent_volumes": [
+      "volumes": [
         "data:/tmp/data"
       ]
     }
