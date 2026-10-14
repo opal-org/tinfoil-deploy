@@ -13,7 +13,7 @@
   "containers": [
     {
       "name": "nomic-embed-text-v1.5",
-      "image": "ghcr.io/huggingface/text-embeddings-inference@sha256:346a39baecdd03c40e77184c66a4a9931ec2e25b8e57ff3766b79affdbd38673",
+      "image": "ghcr.io/huggingface/text-embeddings-inference:100-1.9@sha256:16be3893ada5d7decaa60bb08b5cd021504b783bfd87ab1473ebacae7026add3",
       "runtime": "nvidia",
       "gpus": "all",
       "restart": "always",

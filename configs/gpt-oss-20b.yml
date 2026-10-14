@@ -21,8 +21,8 @@
   ],
   "containers": [
     {
-      "name": "inference",
-      "image": "ghcr.io/tinfoilsh/confidential-gpt-oss-120b@sha256:833ac2328360abfd4935bbaafc84c00437484531e81e1ce5fc9b8308dc623ad5",
+      "name": "gpt-oss-20b",
+      "image": "vllm/vllm-openai:v0.17.0-cu130@sha256:de06f6d78a2ce86856094a643d6c914d8bd7109f73c2e30f38097197b2f2bba1",
       "runtime": "nvidia",
       "gpus": "all",
       "networks": [
@@ -44,8 +44,7 @@
       ],
       "tmpfs": {
         "/tmp": "size=512m,mode=1777,exec",
-        "/root": "size=2g,mode=0700,exec",
-        "/usr/local/lib/python3.12/dist-packages/flashinfer_cubin/cubins": "size=2g,mode=1777,exec"
+        "/root": "size=2g,mode=0700,exec"
       },
       "healthcheck": {
         "test": [
@@ -57,7 +56,14 @@
         "interval": "30s",
         "timeout": "5s",
         "start_period": "30m"
-      }
+      },
+      "ipc": "private",
+      "shm_size": "2g",
+      "env": [
+        {
+          "LD_LIBRARY_PATH": "/usr/local/nvidia/lib64:/usr/local/nvidia/lib:/usr/lib/x86_64-linux-gnu"
+        }
+      ]
     }
   ],
   "shim": {
