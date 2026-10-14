@@ -52,9 +52,6 @@
       "ports": [
         "22:22"
       ],
-      "volumes": [
-        "data:/tmp/data"
-      ],
       "restart": "on-failure",
       "tmpfs": {
         "/run": "size=128m,mode=755",
@@ -120,7 +117,10 @@
         "timeout": "5s",
         "retries": 12,
         "start_period": "30s"
-      }
+      },
+      "persistent_volumes": [
+        "data:/tmp/data"
+      ]
     }
   ],
   "shim": {
