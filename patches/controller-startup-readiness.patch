@@ -1,0 +1,68 @@
+--- a/start_opal.py
++++ b/start_opal.py
+@@ -1,4 +1,5 @@
+ #!/usr/bin/env python3
++import ast
+ import json
+ import os
+ import subprocess
+@@ -8,6 +9,7 @@
+ 
+ import requests
+ 
++parser_root = Path(__file__).resolve().parent
+ data = Path("/tmp/data")
+ probe = data / ".opal-write-check"
+ probe.write_bytes(b"ready\n")
+@@ -21,7 +23,12 @@
+ environment.update({"OPAL_CLIENT_STATE_KEY_HEX": key,
+                     "OPAL_CLIENT_KEY_BOOTSTRAP_TOKEN": payload["bootstrap_token"],
+                     "OPAL_ROLLBACK_SIGNING_KEY_HEX": payload["rollback_signing_key_hex"],
+-                    "OPAL_ORAM_INSECURE_FAST": "0"})
++                    "OPAL_ORAM_INSECURE_FAST": "0",
++                    "OPAL_BOOTSTRAP_MODE": "empty",
++                    "OPAL_ORAM_FAISS_AUTOLOAD_ARTIFACT_RESOURCES": "0",
++                    "OPAL_ORAM_PREFIX_FAISS_BOOTSTRAP_ROWS": "64000",
++                    "OPAL_CHECKPOINT_FILE": str(data / "opal-artifacts/current/opal_online_checkpoint.json"),
++                    "OPAL_MODEL_TIMING_JSONL": str(data / "logs/model_timing.jsonl")})
+ logs = data / "logs"
+ logs.mkdir(exist_ok=True)
+ proxies = []
+@@ -30,8 +37,10 @@
+     ("chat", environment["TINFOIL_LLM_INFERENCE_ENCLAVE"], environment["TINFOIL_LLM_INFERENCE_REPO"], 18082),
+ ]:
+     with (logs / (name + "-proxy.log")).open("ab") as log:
+-        process = subprocess.Popen(["/usr/local/bin/tinfoil", "proxy", "--enclave", enclave,
+-                                    "--repo", repo, "--bind", "127.0.0.1", "--port", str(port)],
++        service = "nomic-embed-text" if name == "embedding" else "gpt-oss-20b"
++        process = subprocess.Popen([sys.executable, str(parser_root / "v2_model_proxy.py"),
++                                    "--pins", str(parser_root / "model-pins.json"),
++                                    "--service", service, "--port", str(port)],
+                                    env=environment, stdout=log, stderr=subprocess.STDOUT,
+                                    start_new_session=True)
+     proxies.append((process, port))
+@@ -50,12 +59,22 @@
+         raise SystemExit("Verified model proxy did not become ready")
+ artifacts = data / "opal-artifacts/current"
+ if not (artifacts / "unified_v2.db").exists():
+-    scaffold = "from python.trusted.tinfoil.deploy_disk_runtime import SCAFFOLD_SCRIPT\nexec(SCAFFOLD_SCRIPT)"
++    deployment_source = Path("/app/python/trusted/tinfoil/deploy_disk_runtime.py").read_text()
++    scaffold_assignment = next(
++        node for node in ast.parse(deployment_source).body
++        if isinstance(node, ast.Assign)
++        and any(isinstance(target, ast.Name) and target.id == "SCAFFOLD_SCRIPT"
++                for target in node.targets)
++    )
++    scaffold = ast.literal_eval(scaffold_assignment.value)
+     subprocess.run([sys.executable, "-c", scaffold], env=environment, cwd="/app", check=True)
+ command = [sys.executable, "-u", "-m", "python.runtime.opal_function_server",
+            "--host", "0.0.0.0", "--port", "8080", "--storage-mode", "disk",
+            "--artifacts-dir", str(artifacts), "--query-candidate-budget", "200", "--query-top-k-budget", "10"]
+-subprocess.run(command + ["--bootstrap-rollback-state"], env=environment, cwd="/app", check=True)
++bootstrap_environment = dict(environment)
++bootstrap_environment["OPAL_SESSION_LIFECYCLE_DEFER_HEAVY_BOOT"] = "0"
++subprocess.run(command + ["--bootstrap-rollback-state"], env=bootstrap_environment,
++               cwd="/app", check=True)
+ with (logs / "opal-runtime.log").open("ab") as log:
+     process = subprocess.Popen(command, env=environment, cwd="/app", stdout=log,
+                                stderr=subprocess.STDOUT, start_new_session=True)

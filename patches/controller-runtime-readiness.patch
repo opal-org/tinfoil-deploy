@@ -1,0 +1,89 @@
+--- a/opal_function_server.py
++++ b/opal_function_server.py
+@@ -3018,6 +3018,7 @@
+             return
+         self._materialize_opal_session_working_set_locked()
+         self._hydrate_runtime_state_from_client_state(apply_live_state=True)
++        self._load_or_bootstrap_rollback_state()
+         self.opal_session_working_set_materialized = True
+         _print_boot_stage_metrics("runtime_ready")
+         self.runtime_ready = True
+@@ -9801,24 +9802,29 @@
+                 total_bytes += int(path.stat().st_size)
+         return int(total_bytes)
+ 
+-    def _oram_client_state_metrics(self) -> Dict[str, int]:
++    def _oram_client_state_metrics(self) -> Dict[str, Any]:
+         ann_native_metrics = self.oram_ann_store.native_memory_metrics()
+-        data_native_metrics = self.oram_data_store.native_memory_metrics()
+-        ann_native_bytes = int(ann_native_metrics.get("total_bytes", 0) or 0)
+-        data_native_bytes = int(data_native_metrics.get("total_bytes", 0) or 0)
++        data_native_export = getattr(self.oram_data_store, "native_memory_metrics", None)
++        data_native_metrics = data_native_export() if callable(data_native_export) else {}
++        ann_native_available = callable(getattr(getattr(self.oram_ann_store, "store", None), "native_memory_metrics_json", None))
++        data_native_available = callable(data_native_export)
++        ann_native_bytes = int(ann_native_metrics["total_bytes"]) if ann_native_available else None
++        data_native_bytes = int(data_native_metrics["total_bytes"]) if data_native_available else None
+         runtime_checkpoint_bytes = _json_size_bytes(self._build_runtime_checkpoint_payload())
+         total_bytes = int(
+-            ann_native_bytes
+-            + data_native_bytes
++            (ann_native_bytes or 0)
++            + (data_native_bytes or 0)
+             + runtime_checkpoint_bytes
+         )
+         return {
+-            "oram_ann_native_bytes": int(ann_native_bytes),
+-            "oram_data_native_bytes": int(data_native_bytes),
++            "oram_ann_native_bytes": ann_native_bytes,
++            "oram_data_native_bytes": data_native_bytes,
+             "oram_ann_native_breakdown": dict(ann_native_metrics),
+             "oram_data_native_breakdown": dict(data_native_metrics),
+             "runtime_checkpoint_json_bytes": int(runtime_checkpoint_bytes),
+             "total_bytes": int(total_bytes),
++            "native_memory_measurement_complete": bool(ann_native_available and data_native_available),
++            "total_bytes_is_lower_bound": not (ann_native_available and data_native_available),
+         }
+ 
+     def state_size_metrics(self) -> Dict[str, Any]:
+@@ -9826,8 +9832,9 @@
+         oram_client_state_metrics = self._oram_client_state_metrics()
+         kg_live_sqlite_metrics = self._kg_live_sqlite_metrics()
+         dream_runtime = getattr(self, "dream_runtime", None)
++        dream_memory_export = getattr(dream_runtime, "resident_proxy_bytes", None)
+         dream_runtime_state_bytes = (
+-            int(dream_runtime.resident_proxy_bytes()) if dream_runtime is not None else 0
++            int(dream_memory_export()) if callable(dream_memory_export) else None
+         )
+         oram_data_cache_payload_bytes = self._oram_data_cache_payload_bytes()
+         faiss_resource_bytes = int(self.faiss_resource_bytes)
+@@ -9903,7 +9910,7 @@
+             int(ann_metadata_metrics["total_bytes"])
+             + int(oram_client_state_metrics["total_bytes"])
+             + int(kg_live_sqlite_metrics["resident_proxy_bytes"])
+-            + int(dream_runtime_state_bytes)
++            + int(dream_runtime_state_bytes or 0)
+             + int(oram_data_cache_metadata_bytes)
+             + int(faiss_resource_bytes)
+             + int(secure_baseline_resident_working_set_floor_bytes)
+@@ -9915,7 +9922,8 @@
+             "oram_client_state_breakdown": dict(oram_client_state_metrics),
+             "knowledge_graph_state_bytes": int(kg_live_sqlite_metrics["resident_proxy_bytes"]),
+             "knowledge_graph_state_breakdown": dict(kg_live_sqlite_metrics),
+-            "dream_runtime_state_bytes": int(dream_runtime_state_bytes),
++            "dream_runtime_state_bytes": dream_runtime_state_bytes,
++            "dream_runtime_memory_measurement_available": callable(dream_memory_export),
+             "faiss_resource_bytes": int(faiss_resource_bytes),
+             "oram_data_cache_metadata_bytes": int(oram_data_cache_metadata_bytes),
+             "oram_data_cache_payload_bytes": int(oram_data_cache_payload_bytes),
+@@ -9939,6 +9947,10 @@
+                 secure_baseline_resident_working_set_floor_bytes
+             ),
+             "live_user_state_bytes_total": int(live_user_state_bytes_total),
++            "live_user_state_bytes_total_is_lower_bound": (
++                not callable(dream_memory_export)
++                or bool(oram_client_state_metrics["total_bytes_is_lower_bound"])
++            ),
+         }
+ 
+     def summary_runtime_metrics(self) -> Dict[str, Any]:
