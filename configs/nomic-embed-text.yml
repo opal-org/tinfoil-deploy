@@ -1,0 +1,70 @@
+{
+  "cvm-version": "0.14.13",
+  "cpus": 16,
+  "memory": 65536,
+  "gpus": 1,
+  "models": [
+    {
+      "name": "nomic-embed-text-v1.5",
+      "repo": "nomic-ai/nomic-embed-text-v1.5@e5cf08aadaa33385f5990def41f7a23405aec398",
+      "mpk": "868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935_2215256064_328142c7-83ed-5f89-a463-0a11367cf58f"
+    }
+  ],
+  "containers": [
+    {
+      "name": "nomic-embed-text-v1.5",
+      "image": "ghcr.io/huggingface/text-embeddings-inference@sha256:346a39baecdd03c40e77184c66a4a9931ec2e25b8e57ff3766b79affdbd38673",
+      "runtime": "nvidia",
+      "gpus": "all",
+      "restart": "always",
+      "command": [
+        "--model-id",
+        "/tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935",
+        "--served-model-name",
+        "nomic-embed-text",
+        "--port",
+        "8001"
+      ],
+      "tmpfs": {
+        "/tmp": "size=512m,mode=1777,exec",
+        "/root": "size=2g,mode=0700,exec"
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-sf",
+          "http://localhost:8001/health"
+        ],
+        "interval": "30s",
+        "timeout": "5s",
+        "start_period": "60m"
+      },
+      "networks": [
+        "nvidia"
+      ]
+    }
+  ],
+  "shim": {
+    "upstream-port": 8001,
+    "authenticated": true,
+    "authenticated-endpoints": [
+      "/v1/embeddings",
+      "/metrics"
+    ],
+    "paths": [
+      "/v1/embeddings",
+      "/metrics",
+      "/health"
+    ]
+  },
+  "networks": {
+    "nvidia": {
+      "egress": "allowlist",
+      "allow": [
+        "edge.urm.nvidia.com",
+        "openaipublic.blob.core.windows.net"
+      ]
+    }
+  }
+}
