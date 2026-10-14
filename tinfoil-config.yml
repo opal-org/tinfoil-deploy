@@ -1,35 +1,142 @@
-cvm-version: 0.7.1
-cpus: 4
-memory: 4096
-
-containers:
-  - name: "app"
-    image: "ghcr.io/opal-org/tinfoil-smoke-function:tinfoil-smoke-v0.2.3@sha256:d66157ceae9666d00d5aca292915620563d0bfd7e126224cfb51c988078489e9"
-    env:
-      - TINFOIL_BASE_URL: "https://router.inf5.tinfoil.sh/v1"
-      - TINFOIL_INFERENCE_ENCLAVE: "router.inf5.tinfoil.sh"
-      - TINFOIL_INFERENCE_REPO: "tinfoilsh/confidential-model-router"
-      - TINFOIL_LLM_MODEL: "gpt-oss-120b"
-      - TINFOIL_EMBED_MODEL: "nomic-embed-text"
-      - TINFOIL_SMOKE_BUILD_MARKER: "sdk-attested-model-calls-20260303-r1"
-    secrets:
-      - TINFOIL_API_KEY
-
-shim:
-  upstream-port: 8080
-  paths:
-    - /healthz
-    - /ingest
-    - /query
-    - /smoke
-
-network:
-  whitelist:
-    - https://router.inf5.tinfoil.sh
-    - https://router.inf5.tinfoil.sh/.well-known/tinfoil-attestation
-    - https://router.inf5.tinfoil.sh/v1
-    - https://router.inf5.tinfoil.sh/v1/chat/completions
-    - https://router.inf5.tinfoil.sh/v1/embeddings
-    - https://api-github-proxy.tinfoil.sh
-    - https://github-proxy.tinfoil.sh
-    - https://tuf-repo-cdn.sigstore.dev
+{
+  "cvm-version": "0.14.13",
+  "cpus": 4,
+  "memory": 8192,
+  "cvm-network": {
+    "inbound-ports": [
+      22
+    ]
+  },
+  "attested-keys": [
+    {
+      "id": "host-ssh",
+      "key": "ecdsa-p256"
+    }
+  ],
+  "volumes": [
+    {
+      "name": "data",
+      "owner": 0,
+      "exec": true
+    }
+  ],
+  "networks": {
+    "backend": {
+      "egress": "allowlist",
+      "allow": [
+        "api-github-proxy.tinfoil.sh",
+        "api.github.com",
+        "api.tinfoil.sh",
+        "github-proxy.tinfoil.sh",
+        "github.com",
+        "gpt-oss-20b.sky-computing-lab.containers.tinfoil.dev",
+        "nomic-embed-text.sky-computing-lab.containers.tinfoil.dev",
+        "rekor.sigstore.dev",
+        "tuf-repo-cdn.sigstore.dev"
+      ]
+    }
+  },
+  "containers": [
+    {
+      "name": "workspace",
+      "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:c2205279dac0f60e47579c006f3b3d7ca8cef522835c420f83024b2b1be069d7",
+      "user": "0:0",
+      "cvm_admin": true,
+      "read_only": true,
+      "keys": [
+        "host-ssh"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "ports": [
+        "22:22"
+      ],
+      "volumes": [
+        "data:/tmp/data"
+      ],
+      "restart": "on-failure",
+      "tmpfs": {
+        "/run": "size=128m,mode=755",
+        "/tmp": "size=512m,mode=1777",
+        "/root": "size=256m,mode=700"
+      },
+      "env": [
+        {
+          "OPAL_TINFOIL": "1"
+        },
+        {
+          "OPAL_ORAM_INSECURE_FAST": "0"
+        },
+        {
+          "OPAL_ARTIFACTS_DIR": "/tmp/data/opal-artifacts/current"
+        },
+        {
+          "TINFOIL_LLM_MODEL": "gpt-oss-20b"
+        },
+        {
+          "TINFOIL_EMBED_MODEL": "nomic-embed-text"
+        },
+        {
+          "TINFOIL_EMBED_DIM": "768"
+        },
+        {
+          "TINFOIL_TIMEOUT_SECONDS": "300"
+        },
+        {
+          "TINFOIL_BASE_URL": "http://127.0.0.1:18081/v1"
+        },
+        {
+          "TINFOIL_CHAT_COMPLETIONS_URL": "http://127.0.0.1:18082/v1/chat/completions"
+        },
+        {
+          "TINFOIL_VERIFIED_PROXY_ENABLED": "1"
+        },
+        {
+          "TINFOIL_INFERENCE_ENCLAVE": "nomic-embed-text.sky-computing-lab.containers.tinfoil.dev"
+        },
+        {
+          "TINFOIL_INFERENCE_REPO": "opal-org/tinfoil-deploy@v2026.10.14-nomic-memory-check-1"
+        },
+        {
+          "TINFOIL_LLM_INFERENCE_ENCLAVE": "gpt-oss-20b.sky-computing-lab.containers.tinfoil.dev"
+        },
+        {
+          "TINFOIL_LLM_INFERENCE_REPO": "opal-org/tinfoil-deploy@v2026.10.14-gpt-colocated-1"
+        }
+      ],
+      "secrets": [
+        "TINFOIL_API_KEY"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "/usr/sbin/sshd",
+          "-t",
+          "-f",
+          "/run/sshd/opal.conf"
+        ],
+        "interval": "5s",
+        "timeout": "5s",
+        "retries": 12,
+        "start_period": "30s"
+      }
+    }
+  ],
+  "shim": {
+    "upstream-port": 8080,
+    "upstream-container": "workspace",
+    "authenticated": true,
+    "authenticated-endpoints": [
+      "/ingest",
+      "/query",
+      "/bootstrap/client-key"
+    ],
+    "paths": [
+      "/healthz",
+      "/ingest",
+      "/query",
+      "/bootstrap/client-key"
+    ]
+  }
+}
