@@ -1,142 +1,151 @@
 {
   "cvm-version": "0.14.13",
   "cpus": 4,
-  "memory": 8192,
-  "cvm-network": {
-    "inbound-ports": [
-      22
-    ]
-  },
-  "attested-keys": [
-    {
-      "id": "host-ssh",
-      "key": "ecdsa-p256"
-    }
-  ],
-  "volumes": [
-    {
-      "name": "data",
-      "owner": 0,
-      "exec": true
-    }
-  ],
+  "memory": 65536,
+  "gpus": 1,
   "networks": {
-    "backend": {
+    "nvidia": {
       "egress": "allowlist",
       "allow": [
-        "api-github-proxy.tinfoil.sh",
-        "api.github.com",
-        "api.tinfoil.sh",
-        "github-proxy.tinfoil.sh",
-        "github.com",
-        "gpt-oss-20b.sky-computing-lab.containers.tinfoil.dev",
-        "nomic-embed-text.sky-computing-lab.containers.tinfoil.dev",
-        "rekor.sigstore.dev",
-        "tuf-repo-cdn.sigstore.dev"
+        "edge.urm.nvidia.com",
+        "openaipublic.blob.core.windows.net"
       ]
+    },
+    "model-wire": {
+      "egress": "closed"
     }
   },
+  "models": [
+    {
+      "name": "gpt-oss-20b",
+      "repo": "openai/gpt-oss-20b@6cee5e81ee83917806bbde320786a8fb61efebee",
+      "mpk": "fa8945a2fd0ffe7ddfd31b5da869e2c7c045c971e0230e2fd500fc125315f0bf_41301471232_8b6516c9-adf7-5235-a86a-f135dba359c1"
+    }
+  ],
   "containers": [
     {
-      "name": "workspace",
-      "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:88c8134e72f9aa15380c2afbc44be65586121e534b36994b7623eba62d351cec",
-      "user": "0:0",
-      "cvm_admin": true,
-      "read_only": true,
-      "keys": [
-        "host-ssh"
-      ],
+      "name": "gpt-oss-20b",
+      "image": "vllm/vllm-openai:v0.17.0-cu130@sha256:de06f6d78a2ce86856094a643d6c914d8bd7109f73c2e30f38097197b2f2bba1",
+      "runtime": "nvidia",
+      "gpus": "all",
       "networks": [
-        "backend"
+        "nvidia",
+        "model-wire"
       ],
-      "ports": [
-        "22:22"
+      "restart": "always",
+      "command": [
+        "--model",
+        "/tinfoil/mpk/mpk-fa8945a2fd0ffe7ddfd31b5da869e2c7c045c971e0230e2fd500fc125315f0bf",
+        "--served-model-name",
+        "gpt-oss-20b",
+        "--enable-auto-tool-choice",
+        "--tool-call-parser",
+        "openai",
+        "--gpu-memory-utilization",
+        "0.95",
+        "--port",
+        "8001",
+        "--no-enable-log-requests",
+        "--no-enable-log-outputs",
+        "--no-log-error-stack",
+        "--disable-log-stats",
+        "--disable-uvicorn-access-log",
+        "--uvicorn-log-level",
+        "critical"
       ],
-      "volumes": [
-        "data:/tmp/data"
-      ],
-      "restart": "on-failure",
       "tmpfs": {
-        "/run": "size=128m,mode=755",
-        "/tmp": "size=512m,mode=1777",
-        "/root": "size=256m,mode=700"
+        "/tmp": "size=512m,mode=1777,exec",
+        "/root": "size=2g,mode=0700,exec"
       },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-sf",
+          "http://localhost:8001/health"
+        ],
+        "interval": "30s",
+        "timeout": "5s",
+        "start_period": "30m"
+      },
+      "ipc": "private",
+      "shm_size": "2g",
       "env": [
         {
-          "OPAL_TINFOIL": "1"
+          "LD_LIBRARY_PATH": "/usr/local/nvidia/lib64:/usr/local/nvidia/lib:/usr/lib/x86_64-linux-gnu"
         },
         {
-          "OPAL_ORAM_INSECURE_FAST": "0"
+          "VLLM_SERVER_DEV_MODE": "0"
         },
         {
-          "OPAL_ARTIFACTS_DIR": "/tmp/data/opal-artifacts/current"
+          "VLLM_NO_USAGE_STATS": "1"
         },
         {
-          "TINFOIL_LLM_MODEL": "gpt-oss-20b"
+          "DO_NOT_TRACK": "1"
         },
         {
-          "TINFOIL_EMBED_MODEL": "nomic-embed-text"
+          "VLLM_LOGGING_LEVEL": "CRITICAL"
         },
         {
-          "TINFOIL_EMBED_DIM": "768"
+          "HF_HUB_DISABLE_TELEMETRY": "1"
         },
         {
-          "TINFOIL_TIMEOUT_SECONDS": "300"
-        },
-        {
-          "TINFOIL_BASE_URL": "http://127.0.0.1:18081/v1"
-        },
-        {
-          "TINFOIL_CHAT_COMPLETIONS_URL": "http://127.0.0.1:18082/v1/chat/completions"
-        },
-        {
-          "TINFOIL_VERIFIED_PROXY_ENABLED": "1"
-        },
-        {
-          "TINFOIL_INFERENCE_ENCLAVE": "nomic-embed-text.sky-computing-lab.containers.tinfoil.dev"
-        },
-        {
-          "TINFOIL_INFERENCE_REPO": "opal-org/tinfoil-deploy@v2026.10.14-nomic-memory-check-1"
-        },
-        {
-          "TINFOIL_LLM_INFERENCE_ENCLAVE": "gpt-oss-20b.sky-computing-lab.containers.tinfoil.dev"
-        },
-        {
-          "TINFOIL_LLM_INFERENCE_REPO": "opal-org/tinfoil-deploy@v2026.10.14-gpt-colocated-1"
+          "OTEL_SDK_DISABLED": "true"
         }
       ],
-      "secrets": [
-        "TINFOIL_API_KEY"
+      "entrypoint": [
+        "/bin/sh",
+        "-c",
+        "exec vllm serve \"$@\" >/dev/null 2>&1",
+        "opal-private-engine"
+      ]
+    },
+    {
+      "name": "opal-model-wire-gateway",
+      "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/model-wire-gateway@sha256:02996b019f60d94f14a9bce8d01b125979af3e3dc93f4b8fbb3da94633887ba2",
+      "networks": [
+        "model-wire"
+      ],
+      "restart": "always",
+      "command": [
+        "--service",
+        "gpt-oss-20b",
+        "--upstream",
+        "http://gpt-oss-20b:8001",
+        "--port",
+        "8002"
       ],
       "healthcheck": {
         "test": [
           "CMD",
-          "/usr/sbin/sshd",
-          "-t",
-          "-f",
-          "/run/sshd/opal.conf"
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8002/health', timeout=5).read()"
         ],
-        "interval": "5s",
+        "interval": "30s",
         "timeout": "5s",
-        "retries": 12,
-        "start_period": "30s"
-      }
+        "start_period": "60m"
+      },
+      "entrypoint": [
+        "/bin/sh",
+        "-c",
+        "exec python /opt/opal-model-wire/wire_gateway.py \"$@\" >/dev/null 2>&1",
+        "opal-private-gateway"
+      ]
     }
   ],
   "shim": {
-    "upstream-port": 8080,
-    "upstream-container": "workspace",
+    "upstream-port": 8002,
     "authenticated": true,
     "authenticated-endpoints": [
-      "/ingest",
-      "/query",
-      "/bootstrap/client-key"
+      "/v1/chat/completions",
+      "/opal-wire-status"
     ],
     "paths": [
-      "/healthz",
-      "/ingest",
-      "/query",
-      "/bootstrap/client-key"
-    ]
+      "/v1/chat/completions",
+      "/health",
+      "/opal-wire-status"
+    ],
+    "upstream-container": "opal-model-wire-gateway"
   }
 }
