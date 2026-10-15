@@ -44,7 +44,14 @@
         "--gpu-memory-utilization",
         "0.95",
         "--port",
-        "8001"
+        "8001",
+        "--no-enable-log-requests",
+        "--no-enable-log-outputs",
+        "--no-log-error-stack",
+        "--disable-log-stats",
+        "--disable-uvicorn-access-log",
+        "--uvicorn-log-level",
+        "critical"
       ],
       "tmpfs": {
         "/tmp": "size=512m,mode=1777,exec",
@@ -66,7 +73,31 @@
       "env": [
         {
           "LD_LIBRARY_PATH": "/usr/local/nvidia/lib64:/usr/local/nvidia/lib:/usr/lib/x86_64-linux-gnu"
+        },
+        {
+          "VLLM_SERVER_DEV_MODE": "0"
+        },
+        {
+          "VLLM_NO_USAGE_STATS": "1"
+        },
+        {
+          "DO_NOT_TRACK": "1"
+        },
+        {
+          "VLLM_LOGGING_LEVEL": "CRITICAL"
+        },
+        {
+          "HF_HUB_DISABLE_TELEMETRY": "1"
+        },
+        {
+          "OTEL_SDK_DISABLED": "true"
         }
+      ],
+      "entrypoint": [
+        "/bin/sh",
+        "-c",
+        "exec vllm serve \"$@\" >/dev/null 2>&1",
+        "opal-private-engine"
       ]
     },
     {
@@ -94,7 +125,13 @@
         "interval": "30s",
         "timeout": "5s",
         "start_period": "60m"
-      }
+      },
+      "entrypoint": [
+        "/bin/sh",
+        "-c",
+        "exec python /opt/opal-model-wire/wire_gateway.py \"$@\" >/dev/null 2>&1",
+        "opal-private-gateway"
+      ]
     }
   ],
   "shim": {
@@ -106,7 +143,6 @@
     ],
     "paths": [
       "/v1/chat/completions",
-      "/v1/models",
       "/health",
       "/opal-wire-status"
     ],

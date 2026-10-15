@@ -12,6 +12,9 @@
   "fixture_scope": "Actual local TLS, fixed envelopes, deadlines and provider receipt joining; live enclave admission separate",
   "fixture_source_manifest_sha256": "a557ed5f279740c9975eea33cb19b83e5a9ab4c4b77bf7828ca284a22b8c73f4",
   "fixture_receipt_sha256": "e93c7aff11cab449774642d243ba632ca06dd0ea92874acb66b7676dc87048dc",
-  "model_artifacts_and_engine_commands_changed": false,
-  "host_shape_unchanged_from_running_allocation": true
+  "host_shape_unchanged_from_running_allocation": true,
+  "model_artifacts_and_generation_arguments_changed": false,
+  "diagnostic_flags_and_private_output_sink_added": true,
+  "model_external_routes_restricted": true,
+  "security_config_evidence": "model-security-config-v1/REVIEW.json"
 }
