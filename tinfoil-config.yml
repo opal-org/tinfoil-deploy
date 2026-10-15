@@ -24,7 +24,11 @@
         "nomic-embed-text",
         "--port",
         "8001",
-        "--disable-spans"
+        "--disable-spans",
+        "--dtype",
+        "float16",
+        "--pooling",
+        "mean"
       ],
       "tmpfs": {
         "/tmp": "size=512m,mode=1777,exec",
@@ -48,7 +52,7 @@
       "entrypoint": [
         "/bin/sh",
         "-c",
-        "exec ./entrypoint.sh \"$@\" >/dev/null 2>&1",
+        "exec >/dev/null 2>&1; set -eu; printf '%s\\n' '3d6180f7233df2f529d65ea60c8db4af614fb78cbe99fd81103dcfeb9f8166a5  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/1_Pooling/config.json' '0168e0883705b0bf8f2b381e10f45a9f3e1ef4b13869b43c160e4c8a70ddf442  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/config.json' '482f42ca954f5a8d55bccbb437b8d6eb721ce19059c78330c815045ddd1a87eb  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/config_sentence_transformers.json' '9e7d262b1fe5ea350782829496efa831901b77486bbde1cea54a4c822d010d5c  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/model.safetensors' 'f93c503b32fa7bc2e186843f0add961caa14eb68f7be516e327df3cadbcd541a  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/modules.json' '9f40185cc7d04eb95cfc50571d1abde0dce45fb59d9c1321ef4b599d152cef4d  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/sentence_bert_config.json' '5d5b662e421ea9fac075174bb0688ee0d9431699900b90662acd44b2a350503a  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/special_tokens_map.json' 'd241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/tokenizer.json' 'd7e0000bcc80134debd2222220427e6bf5fa20a669f40a0d0d1409cc18e0a9bc  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/tokenizer_config.json' | sha256sum -c -; exec ./entrypoint.sh \"$@\"",
         "opal-private-engine"
       ],
       "env": [
@@ -60,6 +64,9 @@
         },
         {
           "OTEL_SDK_DISABLED": "true"
+        },
+        {
+          "AUTO_TRUNCATE": "false"
         }
       ]
     },
