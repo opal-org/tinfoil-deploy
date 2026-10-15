@@ -1,5 +1,5 @@
 """Model-enclave sidecar. Only the internal model network receives decoded JSON."""
-import argparse,hashlib,http.client,json,math,re,socket,threading,time,urllib.parse
+import argparse,hashlib,http.client,json,math,re,socket,subprocess,threading,time,urllib.parse
 from deadline_http import DeadlineConnection,resolve_origin
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 from model_wire import CONTENT_TYPE,PROFILES,Profile,HEADER,WireError,decode,encode,fixed_content_length,valid_request_json
@@ -10,7 +10,7 @@ class Gateway(ThreadingHTTPServer):
         parsed=urllib.parse.urlsplit(upstream)
         if parsed.scheme!='http' or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment or parsed.path not in ('','/'):raise WireError('Internal model HTTP origin required')
         if not math.isfinite(timeout) or timeout<=0:raise WireError('Finite positive total gateway deadline required')
-        self.profile=profile;self.upstream=(parsed.hostname,parsed.port or 80);self.addresses=resolve_origin(*self.upstream);self.timeout=timeout;self.observe=observe or (lambda x:None);self.capacity=threading.BoundedSemaphore(max_inflight)
+        self.profile=profile;self.upstream=(parsed.hostname,parsed.port or 80);self.addresses=None;self.timeout=timeout;self.observe=observe or (lambda x:None);self.capacity=threading.BoundedSemaphore(max_inflight)
         self.count_lock=threading.Lock();self.inflight=0;self.completed=0;self.admitted=0
         super().__init__(address,Handler)
 
@@ -24,8 +24,13 @@ class Handler(BaseHTTPRequestHandler):
         for k,v in extra:self.send_header(k,v)
         self.end_headers();self.wfile.write(body);self.close_connection=True
     def _engine(self,method,path,body=None):
-        remaining=getattr(self,'request_deadline',time.monotonic()+self.server.timeout)-time.monotonic()
-        connection=DeadlineConnection(*self.server.upstream,self.server.addresses,max(.001,remaining))
+        deadline=getattr(self,'request_deadline',time.monotonic()+self.server.timeout)
+        if self.server.addresses is None:
+            try:self.server.addresses=resolve_origin(*self.server.upstream,timeout=min(10,max(.001,deadline-time.monotonic())))
+            except (subprocess.SubprocessError,OSError) as error:raise WireError('Fixed model origin unavailable') from error
+        remaining=deadline-time.monotonic()
+        if remaining<=0:raise WireError('Model request deadline expired during name resolution')
+        connection=DeadlineConnection(*self.server.upstream,self.server.addresses,remaining)
         started=time.monotonic_ns()
         try:
             connection.request(method,path,body=body,headers={'Content-Type':'application/json','Accept-Encoding':'identity','Connection':'close'})
