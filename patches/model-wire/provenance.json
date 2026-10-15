@@ -1,20 +1,14 @@
 {
-  "schema": "opal_gateway_build_provenance_v1",
-  "source_files_sha256": {
-    "Dockerfile": "8abf69137db2f2fac40654d62888c02d7cf806d8fb5d90d4f3776ff08f383d3a",
-    "model_wire.py": "03885f32b56165722d5454802267f47d727d4362461653fb1331005fe57f5f9c",
-    "wire_gateway.py": "df664711e57a423d4af6c376970113af22d4db01a9cc35000c0b7b83e0789ec0",
-    "deadline_http.py": "1eeb5ceecc7ae92384d824b548fe50b680b83726a1e65b868b9ce69edaeae7bb"
-  },
-  "source_manifest_sha256": "0205faf595e7464e198dbdb55aa4aa5baa50e46311de148709386708bc5c06c8",
-  "base_image": "docker.io/library/python@sha256:2ed6491b93cd49272ee6de2b5a38440c3448360322c089fc23e370722d74179d",
-  "published_image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/model-wire-gateway@sha256:02996b019f60d94f14a9bce8d01b125979af3e3dc93f4b8fbb3da94633887ba2",
-  "fixture_scope": "Actual local TLS, fixed envelopes, deadlines and provider receipt joining; live enclave admission separate",
-  "fixture_source_manifest_sha256": "a557ed5f279740c9975eea33cb19b83e5a9ab4c4b77bf7828ca284a22b8c73f4",
-  "fixture_receipt_sha256": "e93c7aff11cab449774642d243ba632ca06dd0ea92874acb66b7676dc87048dc",
-  "host_shape_unchanged_from_running_allocation": true,
-  "model_artifacts_and_generation_arguments_changed": false,
-  "diagnostic_flags_and_private_output_sink_added": true,
-  "model_external_routes_restricted": true,
-  "security_config_evidence": "model-security-config-v1/REVIEW.json"
+  "scope": "Measured additive model gateway staging; final scientific runtime admission separate",
+  "source_manifest_sha256": "0a8f9ffc1fb646d932a46bddadd8d85907282b94e717c866885304e4f154bcd3",
+  "immutable_image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/model-wire-gateway@sha256:11e38d04a0a2277c81f0fe3081c087fa6d90908398f4f0ba9cc7d16bb107585d",
+  "local_image_id": "sha256:b59b4c36b5da09df1a951f2172ac8367a9472fe960782e22823ed602af71a77e",
+  "deadline_policy_sha256": "3098070ff147a92afab6609b5f67a98a5784fe0a5eccc8de0703b9ecd4b083ec",
+  "gateway_timeout_seconds": 100,
+  "engine_frame_reserve_ms": 100,
+  "DNS_singleflight_and_bounded_negative_cache": true,
+  "gateway_image_and_registry_qualified": true,
+  "models_engines_shapes_original_keys_unchanged": true,
+  "new_live_release_qualified": false,
+  "retained_failure": "First publication failed before login/push because temporary publisher token was not staged; same image published successfully in a fresh finite unit."
 }

@@ -1,105 +1,36 @@
 {
-  "schema": "opal_model_security_config_review_v1",
-  "prepared_utc": "2026-10-15T03:14:27.766981+00:00",
-  "status": "ROOT_APPROVED_STAGING_LIVE_HELP_GATE_PENDING",
-  "staging_only": true,
-  "live_deployment_performed": false,
-  "changes": [
-    {
-      "service": "gpt-oss-20b",
-      "image": "vllm/vllm-openai:v0.17.0-cu130@sha256:de06f6d78a2ce86856094a643d6c914d8bd7109f73c2e30f38097197b2f2bba1",
-      "image_config_entrypoint": [
-        "vllm",
-        "serve"
-      ],
-      "engine_entrypoint": [
-        "/bin/sh",
-        "-c",
-        "exec vllm serve \"$@\" >/dev/null 2>&1",
-        "opal-private-engine"
-      ],
-      "appended_diagnostic_flags": [
-        "--no-enable-log-requests",
-        "--no-enable-log-outputs",
-        "--no-log-error-stack",
-        "--disable-log-stats",
-        "--disable-uvicorn-access-log",
-        "--uvicorn-log-level",
-        "critical"
-      ],
-      "diagnostic_env": {
-        "VLLM_SERVER_DEV_MODE": "0",
-        "VLLM_NO_USAGE_STATS": "1",
-        "DO_NOT_TRACK": "1",
-        "VLLM_LOGGING_LEVEL": "CRITICAL",
-        "HF_HUB_DISABLE_TELEMETRY": "1",
-        "OTEL_SDK_DISABLED": "true"
-      },
-      "model_artifacts_preserved": true,
-      "existing_generation_arguments_preserved": true,
-      "public_routes": [
-        "/v1/chat/completions",
-        "/health",
-        "/opal-wire-status"
-      ],
-      "authenticated_routes": [
-        "/v1/chat/completions",
-        "/opal-wire-status"
-      ],
-      "config_sha256": "2eea30890433a73367bdd73de8f6f53f2be748c13df1a0216c8696c5b84d8a8e"
-    },
+  "status": "PREPARED_NOT_DEPLOYED",
+  "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/model-wire-gateway@sha256:11e38d04a0a2277c81f0fe3081c087fa6d90908398f4f0ba9cc7d16bb107585d",
+  "renderer_sha256": "ee6716006977a2d9604be432056df4e673944b491de36bb8b82078c3e1f2e442",
+  "deadline_contract_sha256": "3098070ff147a92afab6609b5f67a98a5784fe0a5eccc8de0703b9ecd4b083ec",
+  "services": [
     {
       "service": "nomic-embed-text",
-      "image": "ghcr.io/huggingface/text-embeddings-inference:100-1.9@sha256:16be3893ada5d7decaa60bb08b5cd021504b783bfd87ab1473ebacae7026add3",
-      "image_config_entrypoint": [
-        "./entrypoint.sh"
-      ],
-      "engine_entrypoint": [
-        "/bin/sh",
-        "-c",
-        "exec ./entrypoint.sh \"$@\" >/dev/null 2>&1",
-        "opal-private-engine"
-      ],
-      "appended_diagnostic_flags": [
-        "--disable-spans"
-      ],
-      "diagnostic_env": {
-        "LOG_LEVEL": "off",
-        "HF_HUB_DISABLE_TELEMETRY": "1",
-        "OTEL_SDK_DISABLED": "true"
+      "prior_config_sha256": "ec2ca74ec90cdff943e6d2b47a1bc935efaf5c2fde33cd962c360ca93933e89a",
+      "candidate_config_sha256": "ed98de79c1ced3dd08505d094a0fdd1a043d9bd29d765e2b00a1670bd98c2b79",
+      "engine_byte_equivalent_fields": true,
+      "models_unchanged": true,
+      "shape": {
+        "cpus": 4,
+        "memory": 65536,
+        "gpus": 1
       },
-      "model_artifacts_preserved": true,
-      "existing_generation_arguments_preserved": true,
-      "public_routes": [
-        "/v1/embeddings",
-        "/health",
-        "/opal-wire-status"
-      ],
-      "authenticated_routes": [
-        "/v1/embeddings",
-        "/opal-wire-status"
-      ],
-      "config_sha256": "96d7301611d8241c8a322624f771a70de66b32d04f3257e054876e1e07ed1988"
+      "gateway_timeout_seconds": 100
+    },
+    {
+      "service": "gpt-oss-20b",
+      "prior_config_sha256": "d73bd9cde82e1c0780d3366cb7f342ca89d24eda88c0422b48d386155c17feb9",
+      "candidate_config_sha256": "cbb052849d4c6edaa52a16be39c7f32af0bb440e2be3cbe6546b45fc41cefbf8",
+      "engine_byte_equivalent_fields": true,
+      "models_unchanged": true,
+      "shape": {
+        "cpus": 4,
+        "memory": 65536,
+        "gpus": 1
+      },
+      "gateway_timeout_seconds": 100
     }
   ],
-  "custody": {
-    "model_and_gateway_stdout_stderr": "discarded by measured exec entrypoint, including inherited child FDs",
-    "engine_metrics": "engine-private ports only; no container published ports; no external shim metrics path",
-    "gateway_status": "authenticated aggregate counters only; not a per-request diagnostic stream",
-    "public_health": "necessary health response; not an inference endpoint"
-  },
-  "scope_limitations": [
-    "Pinned source and exact registry image metadata inspected; actual deployed configuration/negative routes/log fixture pending new measured release.",
-    "Shell output sink covers inherited stdout/stderr only; arbitrary engine filesystem logging/export destinations require separate pinned configuration inventory.",
-    "Suppression does not establish constant timing or constant TLS packetization."
-  ],
-  "source_manifest": "sources.json",
-  "required_live_checks": [
-    "fresh measured release verification and TLS binding",
-    "healthy models and actual padded roundtrips",
-    "raw metrics/models routes fail closed",
-    "authenticated status counters and no public private diagnostics",
-    "synthetic malformed/overflow fixture and model/container output custody"
-  ],
-  "root_review_utc": "2026-10-15T03:17:02.201704+00:00"
+  "keys_changed": false,
+  "model_traffic": false
 }

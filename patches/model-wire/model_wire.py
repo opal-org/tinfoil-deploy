@@ -1,6 +1,10 @@
 """Fixed application-body frames; no variable-size fallback or model-token padding."""
 import hashlib,json,struct
 from dataclasses import dataclass
+if __package__:
+    from .wire_deadline import DEADLINE_POLICY_SHA256
+else:
+    from wire_deadline import DEADLINE_POLICY_SHA256
 
 CONTENT_TYPE='application/vnd.opal.model-wire.v1'
 MAGIC=b'OPALMW01'
@@ -21,7 +25,7 @@ class Profile:
             if type(size) is not int or not HEADER.size+128<=size<=MAX_FRAME_BYTES:raise WireError('Invalid fixed body size')
     @property
     def sha256(self):
-        return hashlib.sha256(json.dumps(self.__dict__,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        return hashlib.sha256(json.dumps({**self.__dict__,'deadline_policy_sha256':DEADLINE_POLICY_SHA256},sort_keys=True,separators=(',',':')).encode()).hexdigest()
 
 PROFILES={
  'nomic-embed-text':Profile('nomic-embed-text','/v1/embeddings',262144,262144),
@@ -46,7 +50,7 @@ def decode(frame:bytes, *, frame_bytes:int, response:bool=False)->tuple[int,byte
 def valid_request_json(payload:bytes):
     try:
         value=json.loads(payload.decode('utf-8'),parse_constant=lambda x:(_ for _ in ()).throw(WireError('Nonfinite JSON')))
-    except (UnicodeError,ValueError) as exc:raise WireError('Invalid model JSON') from exc
+    except (UnicodeError,ValueError,RecursionError) as exc:raise WireError('Invalid model JSON') from exc
     if not isinstance(value,dict) or value.get('stream',False) is not False:raise WireError('Only nonstreaming model JSON objects are supported')
     return value
 

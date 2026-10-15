@@ -25,18 +25,25 @@ def resolve_origin(host, port, timeout=10):
 
 
 class DeadlineConnection(http.client.HTTPConnection):
-    def __init__(self, host, port, addresses, timeout, tls_context=None, verify_peer=None):
+    def __init__(self, host, port, addresses, timeout, tls_context=None, verify_peer=None, *, absolute_deadline=None):
         if not math.isfinite(timeout) or timeout <= 0:
             raise ValueError('Positive finite total HTTP timeout required')
+        deadline = time.monotonic() + timeout
+        if absolute_deadline is not None:
+            if isinstance(absolute_deadline, bool) or not isinstance(absolute_deadline, (int, float)) or not math.isfinite(absolute_deadline):
+                raise ValueError('Finite absolute HTTP deadline required')
+            deadline = min(deadline, absolute_deadline)
+        if deadline <= time.monotonic():
+            raise HTTPDeadline('Complete HTTP deadline expired before construction')
         super().__init__(host, port, timeout=timeout)
         self.addresses = addresses
         self.tls_context = tls_context
         self.verify_peer = verify_peer
-        self.deadline = time.monotonic() + timeout
+        self.deadline = deadline
         self.expired = threading.Event()
         self.sockets = []
         self.socket_lock = threading.Lock()
-        self.timer = threading.Timer(timeout, self.abort)
+        self.timer = threading.Timer(self.remaining(), self.abort)
         self.timer.daemon = True
         self.timer.start()
 

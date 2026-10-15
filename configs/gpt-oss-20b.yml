@@ -102,7 +102,7 @@
     },
     {
       "name": "opal-model-wire-gateway",
-      "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/model-wire-gateway@sha256:5a946288d5a82a0cca1ea1d5367dfeb410f29e76f5ed36dce59fbfab950e8dcc",
+      "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/model-wire-gateway@sha256:11e38d04a0a2277c81f0fe3081c087fa6d90908398f4f0ba9cc7d16bb107585d",
       "networks": [
         "model-wire"
       ],
@@ -113,7 +113,9 @@
         "--upstream",
         "http://gpt-oss-20b:8001",
         "--port",
-        "8002"
+        "8002",
+        "--timeout",
+        "100"
       ],
       "healthcheck": {
         "test": [
