@@ -1,36 +1,27 @@
 {
   "status": "PREPARED_NOT_DEPLOYED",
-  "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/model-wire-gateway@sha256:11e38d04a0a2277c81f0fe3081c087fa6d90908398f4f0ba9cc7d16bb107585d",
-  "renderer_sha256": "ee6716006977a2d9604be432056df4e673944b491de36bb8b82078c3e1f2e442",
-  "deadline_contract_sha256": "3098070ff147a92afab6609b5f67a98a5784fe0a5eccc8de0703b9ecd4b083ec",
+  "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/model-wire-gateway@sha256:cd20ffa2a64fb3e927c590dff184089ed0a802bdcbfe1dba8dc71ac684ac010f",
   "services": [
     {
       "service": "nomic-embed-text",
-      "prior_config_sha256": "ec2ca74ec90cdff943e6d2b47a1bc935efaf5c2fde33cd962c360ca93933e89a",
-      "candidate_config_sha256": "ed98de79c1ced3dd08505d094a0fdd1a043d9bd29d765e2b00a1670bd98c2b79",
-      "engine_byte_equivalent_fields": true,
-      "models_unchanged": true,
-      "shape": {
-        "cpus": 4,
-        "memory": 65536,
-        "gpus": 1
-      },
-      "gateway_timeout_seconds": 100
+      "prior_config_sha256": "ed98de79c1ced3dd08505d094a0fdd1a043d9bd29d765e2b00a1670bd98c2b79",
+      "candidate_config_sha256": "e7eb8a7959cf1c8c36db1687e4ff533cc6bb41593a9101a940fc303fc52cbab9",
+      "only_changed_json_pointer": "/containers/1/image",
+      "all_other_fields_byte_equivalent_values": true
     },
     {
       "service": "gpt-oss-20b",
-      "prior_config_sha256": "d73bd9cde82e1c0780d3366cb7f342ca89d24eda88c0422b48d386155c17feb9",
-      "candidate_config_sha256": "cbb052849d4c6edaa52a16be39c7f32af0bb440e2be3cbe6546b45fc41cefbf8",
-      "engine_byte_equivalent_fields": true,
-      "models_unchanged": true,
-      "shape": {
-        "cpus": 4,
-        "memory": 65536,
-        "gpus": 1
-      },
-      "gateway_timeout_seconds": 100
+      "prior_config_sha256": "cbb052849d4c6edaa52a16be39c7f32af0bb440e2be3cbe6546b45fc41cefbf8",
+      "candidate_config_sha256": "4e4ec18f12c35d3a9b80c62edc154dbc412fa151aeed98fb6eb4b81be6191d01",
+      "only_changed_json_pointer": "/containers/1/image",
+      "all_other_fields_byte_equivalent_values": true
     }
   ],
+  "gateway_source_manifest_sha256": "cf062bfa10df941596f7801bcf6e7a338f3589805b31b2add13fb9751b2ac8d3",
+  "qualified_renderer_sha256": "ee6716006977a2d9604be432056df4e673944b491de36bb8b82078c3e1f2e442",
+  "method": "Exact prior qualified renderer outputs; replace sole gateway immutable image field, deep structural restoration equality checked",
   "keys_changed": false,
-  "model_traffic": false
+  "model_weights_changed": false,
+  "shape_changed": false,
+  "model_calls": 0
 }

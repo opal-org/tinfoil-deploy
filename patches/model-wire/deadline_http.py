@@ -77,6 +77,7 @@ class DeadlineConnection(http.client.HTTPConnection):
             try:
                 raw.settimeout(self.remaining())
                 raw.connect(tuple(address))
+                raw.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
                 self.sock = raw
                 if self.tls_context:
                     tls = self.tls_context.wrap_socket(raw, server_hostname=self.host, do_handshake_on_connect=False)

@@ -1,12 +1,12 @@
 {
   "schema": "opal_gateway_source_manifest_v1",
-  "purpose": "Exact resolver/frame successor plus reviewed package/standalone import, unchanged canonical profiles",
+  "purpose": "XPORT-LAT measured transport-only successor: TCP_NODELAY and public gateway backlog128; same profiles/deadlines/model policy",
   "deadline_policy_sha256": "3098070ff147a92afab6609b5f67a98a5784fe0a5eccc8de0703b9ecd4b083ec",
   "files": {
     "Dockerfile": "ebed6fbb772e19cd43c4f365206eabb1e9ad4514e6ce03d0ed9d0e579312bc2e",
     "model_wire.py": "0319972d6765a5c7d1f0ef56ba51d5d2f18ec4f7c1eb11414a40eee6c15161b9",
-    "wire_gateway.py": "599d6267c5280f31a8d187a831b21068f58265eb390f699c6ca0d81f4dabdb02",
-    "deadline_http.py": "825def516f0841f1ad967b81195a30ed5db2ecf754b27680473a063cb8c36ff6",
+    "wire_gateway.py": "e681d08373426675b9ae8071305c0070a6ac5ee95409818453c0d3a22cd11936",
+    "deadline_http.py": "ccae46df3dc74db0fdbbfd0caffd1abebe4e91f1b53844db5743108f540a5327",
     "wire_deadline.py": "06eb9519554debbdcf4d464878aafe226983b3b4c55bfd95c537c5570f2dc2da"
   }
 }

@@ -1,14 +1,6 @@
 {
-  "scope": "Measured additive model gateway staging; final scientific runtime admission separate",
-  "source_manifest_sha256": "0a8f9ffc1fb646d932a46bddadd8d85907282b94e717c866885304e4f154bcd3",
-  "immutable_image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/model-wire-gateway@sha256:11e38d04a0a2277c81f0fe3081c087fa6d90908398f4f0ba9cc7d16bb107585d",
-  "local_image_id": "sha256:b59b4c36b5da09df1a951f2172ac8367a9472fe960782e22823ed602af71a77e",
-  "deadline_policy_sha256": "3098070ff147a92afab6609b5f67a98a5784fe0a5eccc8de0703b9ecd4b083ec",
-  "gateway_timeout_seconds": 100,
-  "engine_frame_reserve_ms": 100,
-  "DNS_singleflight_and_bounded_negative_cache": true,
-  "gateway_image_and_registry_qualified": true,
-  "models_engines_shapes_original_keys_unchanged": true,
-  "new_live_release_qualified": false,
-  "retained_failure": "First publication failed before login/push because temporary publisher token was not staged; same image published successfully in a fresh finite unit."
+  "scope": "Operational measured gateway staging only; final scientific runtime not admitted",
+  "source_manifest_sha256": "cf062bfa10df941596f7801bcf6e7a338f3589805b31b2add13fb9751b2ac8d3",
+  "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/model-wire-gateway@sha256:cd20ffa2a64fb3e927c590dff184089ed0a802bdcbfe1dba8dc71ac684ac010f",
+  "root_rollout_admission_sha256": "c259d6065bb3f18dac3f54f06c98deefe2be5679ca8684686149a0180ab3d33d"
 }

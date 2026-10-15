@@ -10,6 +10,7 @@ RESPONSE_FRAME_MARGIN_SECONDS=.1
 
 class Gateway(ThreadingHTTPServer):
     daemon_threads=True
+    request_queue_size=128
     def __init__(self,address,profile:Profile,upstream:str,*,timeout:float=GATEWAY_SECONDS,observe=None,max_inflight:int=32):
         parsed=urllib.parse.urlsplit(upstream)
         if parsed.scheme!='http' or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment or parsed.path not in ('','/'):raise WireError('Internal model HTTP origin required')

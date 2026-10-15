@@ -102,7 +102,7 @@
     },
     {
       "name": "opal-model-wire-gateway",
-      "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/model-wire-gateway@sha256:11e38d04a0a2277c81f0fe3081c087fa6d90908398f4f0ba9cc7d16bb107585d",
+      "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/model-wire-gateway@sha256:cd20ffa2a64fb3e927c590dff184089ed0a802bdcbfe1dba8dc71ac684ac010f",
       "networks": [
         "model-wire"
       ],
