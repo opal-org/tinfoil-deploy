@@ -1,6 +1,6 @@
 {
   "cvm-version": "0.14.13",
-  "cpus": 16,
+  "cpus": 4,
   "memory": 65536,
   "gpus": 1,
   "models": [
@@ -41,22 +41,53 @@
         "start_period": "60m"
       },
       "networks": [
-        "nvidia"
+        "nvidia",
+        "model-wire"
       ]
+    },
+    {
+      "name": "opal-model-wire-gateway",
+      "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/model-wire-gateway@sha256:02996b019f60d94f14a9bce8d01b125979af3e3dc93f4b8fbb3da94633887ba2",
+      "networks": [
+        "model-wire"
+      ],
+      "restart": "always",
+      "command": [
+        "--service",
+        "nomic-embed-text",
+        "--upstream",
+        "http://nomic-embed-text-v1.5:8001",
+        "--port",
+        "8002"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8002/health', timeout=5).read()"
+        ],
+        "interval": "30s",
+        "timeout": "5s",
+        "start_period": "60m"
+      }
     }
   ],
   "shim": {
-    "upstream-port": 8001,
+    "upstream-port": 8002,
     "authenticated": true,
     "authenticated-endpoints": [
       "/v1/embeddings",
-      "/metrics"
+      "/metrics",
+      "/opal-wire-status"
     ],
     "paths": [
       "/v1/embeddings",
       "/metrics",
-      "/health"
-    ]
+      "/health",
+      "/opal-wire-status"
+    ],
+    "upstream-container": "opal-model-wire-gateway"
   },
   "networks": {
     "nvidia": {
@@ -65,6 +96,9 @@
         "edge.urm.nvidia.com",
         "openaipublic.blob.core.windows.net"
       ]
+    },
+    "model-wire": {
+      "egress": "closed"
     }
   }
 }
