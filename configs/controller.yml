@@ -1,142 +1,96 @@
-{
-  "cvm-version": "0.14.13",
-  "cpus": 4,
-  "memory": 8192,
-  "cvm-network": {
-    "inbound-ports": [
-      22
-    ]
-  },
-  "attested-keys": [
-    {
-      "id": "host-ssh",
-      "key": "ecdsa-p256"
-    }
-  ],
-  "volumes": [
-    {
-      "name": "data",
-      "owner": 0,
-      "exec": true
-    }
-  ],
-  "networks": {
-    "backend": {
-      "egress": "allowlist",
-      "allow": [
-        "api-github-proxy.tinfoil.sh",
-        "api.github.com",
-        "api.tinfoil.sh",
-        "github-proxy.tinfoil.sh",
-        "github.com",
-        "gpt-oss-20b.sky-computing-lab.containers.tinfoil.dev",
-        "nomic-embed-text.sky-computing-lab.containers.tinfoil.dev",
-        "rekor.sigstore.dev",
-        "tuf-repo-cdn.sigstore.dev"
-      ]
-    }
-  },
-  "containers": [
-    {
-      "name": "workspace",
-      "image": "us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:88c8134e72f9aa15380c2afbc44be65586121e534b36994b7623eba62d351cec",
-      "user": "0:0",
-      "cvm_admin": true,
-      "read_only": true,
-      "keys": [
-        "host-ssh"
-      ],
-      "networks": [
-        "backend"
-      ],
-      "ports": [
-        "22:22"
-      ],
-      "volumes": [
-        "data:/tmp/data"
-      ],
-      "restart": "on-failure",
-      "tmpfs": {
-        "/run": "size=128m,mode=755",
-        "/tmp": "size=512m,mode=1777",
-        "/root": "size=256m,mode=700"
-      },
-      "env": [
-        {
-          "OPAL_TINFOIL": "1"
-        },
-        {
-          "OPAL_ORAM_INSECURE_FAST": "0"
-        },
-        {
-          "OPAL_ARTIFACTS_DIR": "/tmp/data/opal-artifacts/current"
-        },
-        {
-          "TINFOIL_LLM_MODEL": "gpt-oss-20b"
-        },
-        {
-          "TINFOIL_EMBED_MODEL": "nomic-embed-text"
-        },
-        {
-          "TINFOIL_EMBED_DIM": "768"
-        },
-        {
-          "TINFOIL_TIMEOUT_SECONDS": "300"
-        },
-        {
-          "TINFOIL_BASE_URL": "http://127.0.0.1:18081/v1"
-        },
-        {
-          "TINFOIL_CHAT_COMPLETIONS_URL": "http://127.0.0.1:18082/v1/chat/completions"
-        },
-        {
-          "TINFOIL_VERIFIED_PROXY_ENABLED": "1"
-        },
-        {
-          "TINFOIL_INFERENCE_ENCLAVE": "nomic-embed-text.sky-computing-lab.containers.tinfoil.dev"
-        },
-        {
-          "TINFOIL_INFERENCE_REPO": "opal-org/tinfoil-deploy@v2026.10.14-nomic-memory-check-1"
-        },
-        {
-          "TINFOIL_LLM_INFERENCE_ENCLAVE": "gpt-oss-20b.sky-computing-lab.containers.tinfoil.dev"
-        },
-        {
-          "TINFOIL_LLM_INFERENCE_REPO": "opal-org/tinfoil-deploy@v2026.10.14-gpt-colocated-1"
-        }
-      ],
-      "secrets": [
-        "TINFOIL_API_KEY"
-      ],
-      "healthcheck": {
-        "test": [
-          "CMD",
-          "/usr/sbin/sshd",
-          "-t",
-          "-f",
-          "/run/sshd/opal.conf"
-        ],
-        "interval": "5s",
-        "timeout": "5s",
-        "retries": 12,
-        "start_period": "30s"
-      }
-    }
-  ],
-  "shim": {
-    "upstream-port": 8080,
-    "upstream-container": "workspace",
-    "authenticated": true,
-    "authenticated-endpoints": [
-      "/ingest",
-      "/query",
-      "/bootstrap/client-key"
-    ],
-    "paths": [
-      "/healthz",
-      "/ingest",
-      "/query",
-      "/bootstrap/client-key"
-    ]
-  }
-}
+cvm-version: 0.14.13
+cpus: 4
+memory: 8192
+cvm-network:
+  inbound-ports:
+  - 22
+attested-keys:
+- id: host-ssh
+  key: ecdsa-p256
+volumes:
+- name: data
+  owner: 0
+  exec: true
+networks:
+  backend:
+    egress: allowlist
+    allow:
+    - api-github-proxy.tinfoil.sh
+    - api.github.com
+    - api.tinfoil.sh
+    - github-proxy.tinfoil.sh
+    - github.com
+    - gpt-oss-20b.sky-computing-lab.containers.tinfoil.dev
+    - nomic-embed-text.sky-computing-lab.containers.tinfoil.dev
+    - rekor.sigstore.dev
+    - tuf-repo-cdn.sigstore.dev
+    - storage.googleapis.com
+containers:
+- name: workspace
+  image: us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:0491a64b2abdf6756fe835585dee98306895b2810fcc1517ec70788ba9f81dd2
+  user: 0:0
+  cvm_admin: true
+  read_only: true
+  keys:
+  - host-ssh
+  networks:
+  - backend
+  ports:
+  - '22:22'
+  volumes:
+  - data:/tmp/data
+  - data:/mnt/opaldata/jobs-staging/production65536-w21-20261015-a3/work
+  restart: on-failure
+  tmpfs:
+    /run: size=128m,mode=755
+    /tmp: size=512m,mode=1777
+    /root: size=256m,mode=700
+  env:
+  - OPAL_TINFOIL: '1'
+  - OPAL_ORAM_INSECURE_FAST: '0'
+  - OPAL_ARTIFACTS_DIR: /tmp/data/opal-artifacts/current
+  - TINFOIL_LLM_MODEL: gpt-oss-20b
+  - TINFOIL_EMBED_MODEL: nomic-embed-text
+  - TINFOIL_EMBED_DIM: '768'
+  - TINFOIL_TIMEOUT_SECONDS: '110'
+  - TINFOIL_BASE_URL: http://127.0.0.1:18081/v1
+  - TINFOIL_CHAT_COMPLETIONS_URL: http://127.0.0.1:18082/v1/chat/completions
+  - TINFOIL_VERIFIED_PROXY_ENABLED: '1'
+  - TINFOIL_INFERENCE_ENCLAVE: nomic-embed-text.sky-computing-lab.containers.tinfoil.dev
+  - TINFOIL_INFERENCE_REPO: opal-org/tinfoil-deploy@v2026.10.15-nomic-embed-text-wire-5
+  - TINFOIL_LLM_INFERENCE_ENCLAVE: gpt-oss-20b.sky-computing-lab.containers.tinfoil.dev
+  - TINFOIL_LLM_INFERENCE_REPO: opal-org/tinfoil-deploy@v2026.10.15-gpt-oss-20b-wire-4
+  secrets:
+  - TINFOIL_API_KEY
+  healthcheck:
+    test:
+    - CMD
+    - /usr/sbin/sshd
+    - -t
+    - -f
+    - /run/sshd/opal.conf
+    interval: 5s
+    timeout: 5s
+    retries: 12
+    start_period: 30s
+  shm_size: 4g
+shim:
+  upstream-port: 8080
+  upstream-container: workspace
+  authenticated: true
+  authenticated-endpoints:
+  - /ingest
+  - /query
+  - /bootstrap/client-key
+  - /maintenance/append-indexed-source
+  - /e1/ann
+  - /e1/kg
+  - /healthz
+  paths:
+  - /healthz
+  - /ingest
+  - /query
+  - /bootstrap/client-key
+  - /maintenance/append-indexed-source
+  - /e1/ann
+  - /e1/kg
