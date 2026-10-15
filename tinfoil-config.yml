@@ -3,55 +3,28 @@
   "cpus": 4,
   "memory": 65536,
   "gpus": 1,
-  "networks": {
-    "nvidia": {
-      "egress": "allowlist",
-      "allow": [
-        "edge.urm.nvidia.com",
-        "openaipublic.blob.core.windows.net"
-      ]
-    },
-    "model-wire": {
-      "egress": "closed"
-    }
-  },
   "models": [
     {
-      "name": "gpt-oss-20b",
-      "repo": "openai/gpt-oss-20b@6cee5e81ee83917806bbde320786a8fb61efebee",
-      "mpk": "fa8945a2fd0ffe7ddfd31b5da869e2c7c045c971e0230e2fd500fc125315f0bf_41301471232_8b6516c9-adf7-5235-a86a-f135dba359c1"
+      "name": "nomic-embed-text-v1.5",
+      "repo": "nomic-ai/nomic-embed-text-v1.5@e5cf08aadaa33385f5990def41f7a23405aec398",
+      "mpk": "868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935_2215256064_328142c7-83ed-5f89-a463-0a11367cf58f"
     }
   ],
   "containers": [
     {
-      "name": "gpt-oss-20b",
-      "image": "vllm/vllm-openai:v0.17.0-cu130@sha256:de06f6d78a2ce86856094a643d6c914d8bd7109f73c2e30f38097197b2f2bba1",
+      "name": "nomic-embed-text-v1.5",
+      "image": "ghcr.io/huggingface/text-embeddings-inference:100-1.9@sha256:16be3893ada5d7decaa60bb08b5cd021504b783bfd87ab1473ebacae7026add3",
       "runtime": "nvidia",
       "gpus": "all",
-      "networks": [
-        "nvidia",
-        "model-wire"
-      ],
       "restart": "always",
       "command": [
-        "--model",
-        "/tinfoil/mpk/mpk-fa8945a2fd0ffe7ddfd31b5da869e2c7c045c971e0230e2fd500fc125315f0bf",
+        "--model-id",
+        "/tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935",
         "--served-model-name",
-        "gpt-oss-20b",
-        "--enable-auto-tool-choice",
-        "--tool-call-parser",
-        "openai",
-        "--gpu-memory-utilization",
-        "0.95",
+        "nomic-embed-text",
         "--port",
         "8001",
-        "--no-enable-log-requests",
-        "--no-enable-log-outputs",
-        "--no-log-error-stack",
-        "--disable-log-stats",
-        "--disable-uvicorn-access-log",
-        "--uvicorn-log-level",
-        "critical"
+        "--disable-spans"
       ],
       "tmpfs": {
         "/tmp": "size=512m,mode=1777,exec",
@@ -66,25 +39,21 @@
         ],
         "interval": "30s",
         "timeout": "5s",
-        "start_period": "30m"
+        "start_period": "60m"
       },
-      "ipc": "private",
-      "shm_size": "2g",
+      "networks": [
+        "nvidia",
+        "model-wire"
+      ],
+      "entrypoint": [
+        "/bin/sh",
+        "-c",
+        "exec ./entrypoint.sh \"$@\" >/dev/null 2>&1",
+        "opal-private-engine"
+      ],
       "env": [
         {
-          "LD_LIBRARY_PATH": "/usr/local/nvidia/lib64:/usr/local/nvidia/lib:/usr/lib/x86_64-linux-gnu"
-        },
-        {
-          "VLLM_SERVER_DEV_MODE": "0"
-        },
-        {
-          "VLLM_NO_USAGE_STATS": "1"
-        },
-        {
-          "DO_NOT_TRACK": "1"
-        },
-        {
-          "VLLM_LOGGING_LEVEL": "CRITICAL"
+          "LOG_LEVEL": "off"
         },
         {
           "HF_HUB_DISABLE_TELEMETRY": "1"
@@ -92,12 +61,6 @@
         {
           "OTEL_SDK_DISABLED": "true"
         }
-      ],
-      "entrypoint": [
-        "/bin/sh",
-        "-c",
-        "exec vllm serve \"$@\" >/dev/null 2>&1",
-        "opal-private-engine"
       ]
     },
     {
@@ -109,9 +72,9 @@
       "restart": "always",
       "command": [
         "--service",
-        "gpt-oss-20b",
+        "nomic-embed-text",
         "--upstream",
-        "http://gpt-oss-20b:8001",
+        "http://nomic-embed-text-v1.5:8001",
         "--port",
         "8002"
       ],
@@ -138,14 +101,26 @@
     "upstream-port": 8002,
     "authenticated": true,
     "authenticated-endpoints": [
-      "/v1/chat/completions",
+      "/v1/embeddings",
       "/opal-wire-status"
     ],
     "paths": [
-      "/v1/chat/completions",
+      "/v1/embeddings",
       "/health",
       "/opal-wire-status"
     ],
     "upstream-container": "opal-model-wire-gateway"
+  },
+  "networks": {
+    "nvidia": {
+      "egress": "allowlist",
+      "allow": [
+        "edge.urm.nvidia.com",
+        "openaipublic.blob.core.windows.net"
+      ]
+    },
+    "model-wire": {
+      "egress": "closed"
+    }
   }
 }
