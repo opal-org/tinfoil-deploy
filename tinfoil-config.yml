@@ -3,32 +3,55 @@
   "cpus": 4,
   "memory": 65536,
   "gpus": 1,
+  "networks": {
+    "nvidia": {
+      "egress": "allowlist",
+      "allow": [
+        "edge.urm.nvidia.com",
+        "openaipublic.blob.core.windows.net"
+      ]
+    },
+    "model-wire": {
+      "egress": "closed"
+    }
+  },
   "models": [
     {
-      "name": "nomic-embed-text-v1.5",
-      "repo": "nomic-ai/nomic-embed-text-v1.5@e5cf08aadaa33385f5990def41f7a23405aec398",
-      "mpk": "868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935_2215256064_328142c7-83ed-5f89-a463-0a11367cf58f"
+      "name": "gpt-oss-20b",
+      "repo": "openai/gpt-oss-20b@6cee5e81ee83917806bbde320786a8fb61efebee",
+      "mpk": "fa8945a2fd0ffe7ddfd31b5da869e2c7c045c971e0230e2fd500fc125315f0bf_41301471232_8b6516c9-adf7-5235-a86a-f135dba359c1"
     }
   ],
   "containers": [
     {
-      "name": "nomic-embed-text-v1.5",
-      "image": "ghcr.io/huggingface/text-embeddings-inference:100-1.9@sha256:16be3893ada5d7decaa60bb08b5cd021504b783bfd87ab1473ebacae7026add3",
+      "name": "gpt-oss-20b",
+      "image": "vllm/vllm-openai:v0.17.0-cu130@sha256:de06f6d78a2ce86856094a643d6c914d8bd7109f73c2e30f38097197b2f2bba1",
       "runtime": "nvidia",
       "gpus": "all",
+      "networks": [
+        "nvidia",
+        "model-wire"
+      ],
       "restart": "always",
       "command": [
-        "--model-id",
-        "/tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935",
+        "--model",
+        "/tinfoil/mpk/mpk-fa8945a2fd0ffe7ddfd31b5da869e2c7c045c971e0230e2fd500fc125315f0bf",
         "--served-model-name",
-        "nomic-embed-text",
+        "gpt-oss-20b",
+        "--enable-auto-tool-choice",
+        "--tool-call-parser",
+        "openai",
+        "--gpu-memory-utilization",
+        "0.95",
         "--port",
         "8001",
-        "--disable-spans",
-        "--dtype",
-        "float16",
-        "--pooling",
-        "mean"
+        "--no-enable-log-requests",
+        "--no-enable-log-outputs",
+        "--no-log-error-stack",
+        "--disable-log-stats",
+        "--disable-uvicorn-access-log",
+        "--uvicorn-log-level",
+        "critical"
       ],
       "tmpfs": {
         "/tmp": "size=512m,mode=1777,exec",
@@ -43,31 +66,38 @@
         ],
         "interval": "30s",
         "timeout": "5s",
-        "start_period": "60m"
+        "start_period": "30m"
       },
-      "networks": [
-        "nvidia",
-        "model-wire"
-      ],
-      "entrypoint": [
-        "/bin/sh",
-        "-c",
-        "exec >/dev/null 2>&1; set -eu; printf '%s\\n' '3d6180f7233df2f529d65ea60c8db4af614fb78cbe99fd81103dcfeb9f8166a5  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/1_Pooling/config.json' '0168e0883705b0bf8f2b381e10f45a9f3e1ef4b13869b43c160e4c8a70ddf442  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/config.json' '482f42ca954f5a8d55bccbb437b8d6eb721ce19059c78330c815045ddd1a87eb  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/config_sentence_transformers.json' '9e7d262b1fe5ea350782829496efa831901b77486bbde1cea54a4c822d010d5c  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/model.safetensors' 'f93c503b32fa7bc2e186843f0add961caa14eb68f7be516e327df3cadbcd541a  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/modules.json' '9f40185cc7d04eb95cfc50571d1abde0dce45fb59d9c1321ef4b599d152cef4d  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/sentence_bert_config.json' '5d5b662e421ea9fac075174bb0688ee0d9431699900b90662acd44b2a350503a  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/special_tokens_map.json' 'd241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/tokenizer.json' 'd7e0000bcc80134debd2222220427e6bf5fa20a669f40a0d0d1409cc18e0a9bc  /tinfoil/mpk/mpk-868790ff0e4820086091a6a63097f194a0a17bc431dd616538eb7881ecdbd935/tokenizer_config.json' | sha256sum -c -; exec ./entrypoint.sh \"$@\"",
-        "opal-private-engine"
-      ],
+      "ipc": "private",
+      "shm_size": "2g",
       "env": [
         {
-          "LOG_LEVEL": "off"
+          "LD_LIBRARY_PATH": "/usr/local/nvidia/lib64:/usr/local/nvidia/lib:/usr/lib/x86_64-linux-gnu"
+        },
+        {
+          "VLLM_SERVER_DEV_MODE": "0"
+        },
+        {
+          "VLLM_NO_USAGE_STATS": "1"
+        },
+        {
+          "DO_NOT_TRACK": "1"
+        },
+        {
+          "VLLM_LOGGING_LEVEL": "CRITICAL"
         },
         {
           "HF_HUB_DISABLE_TELEMETRY": "1"
         },
         {
           "OTEL_SDK_DISABLED": "true"
-        },
-        {
-          "AUTO_TRUNCATE": "false"
         }
+      ],
+      "entrypoint": [
+        "/bin/sh",
+        "-c",
+        "exec vllm serve \"$@\" >/dev/null 2>&1",
+        "opal-private-engine"
       ]
     },
     {
@@ -79,9 +109,9 @@
       "restart": "always",
       "command": [
         "--service",
-        "nomic-embed-text",
+        "gpt-oss-20b",
         "--upstream",
-        "http://nomic-embed-text-v1.5:8001",
+        "http://gpt-oss-20b:8001",
         "--port",
         "8002",
         "--timeout",
@@ -110,26 +140,14 @@
     "upstream-port": 8002,
     "authenticated": true,
     "authenticated-endpoints": [
-      "/v1/embeddings",
+      "/v1/chat/completions",
       "/opal-wire-status"
     ],
     "paths": [
-      "/v1/embeddings",
+      "/v1/chat/completions",
       "/health",
       "/opal-wire-status"
     ],
     "upstream-container": "opal-model-wire-gateway"
-  },
-  "networks": {
-    "nvidia": {
-      "egress": "allowlist",
-      "allow": [
-        "edge.urm.nvidia.com",
-        "openaipublic.blob.core.windows.net"
-      ]
-    },
-    "model-wire": {
-      "egress": "closed"
-    }
   }
 }
