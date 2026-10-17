@@ -27,7 +27,7 @@ networks:
     - storage.googleapis.com
 containers:
 - name: workspace
-  image: us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:2b2e73e51377d128d8ceab5c907e701cbe047db58cd8c7e1afec1a0f6c3a3dac
+  image: us-central1-docker.pkg.dev/myco-437401/opal-tinfoil/controller@sha256:2178bd48a19187390bc7ffffcb9726c32d05880b4aca8fa95067f1f1d7b931a6
   user: 0:0
   cvm_admin: true
   read_only: true
